@@ -51,7 +51,7 @@
       </div>
 
       <h1 class="auth-title">Iniciar sesión</h1>
-      <p class="auth-sub">¿No tenés cuenta? <a href="registro.html">Registrate gratis</a></p>
+      <p class="auth-sub">¿No tienes cuenta? <a href="registro.html">Regístrate gratis</a></p>
 
       <div class="auth-alert" id="authAlert" style="display:none"></div>
 
@@ -92,7 +92,7 @@
 
       </form>
 
-      <div class="auth-divider"><span>o continuá con</span></div>
+      <div class="auth-divider"><span>o continúa con</span></div>
 
       <div class="social-btns">
         <button class="social-btn" onclick="socialLogin('Google')">
@@ -121,9 +121,9 @@
       const remember = document.getElementById('remember').checked;
       let valid = true;
 
-      if (!email) { setError('email', 'Ingresá tu email'); valid = false; }
+      if (!email) { setError('email', 'Ingresa tu email'); valid = false; }
       else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError('email', 'Email inválido'); valid = false; }
-      if (!password) { setError('password', 'Ingresá tu contraseña'); valid = false; }
+      if (!password) { setError('password', 'Ingresa tu contraseña'); valid = false; }
 
       if (!valid) return;
 
@@ -131,18 +131,21 @@
       btn.disabled = true;
       btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Ingresando...';
 
-      setTimeout(() => {
-        const users = JSON.parse(localStorage.getItem('epc_users') || '[]');
-        const user  = users.find(u => u.email === email && u.password === btoa(password));
-
-        if (user) {
-          loginSuccess(user, remember);
-        } else {
+      auth.signInWithEmailAndPassword(email, password)
+        .then((cred) => {
+          const user = cred.user;
+          loginSuccess({
+            id: user.uid,
+            firstName: user.displayName?.split(' ')[0] || '',
+            lastName:  user.displayName?.split(' ')[1] || '',
+            email:     user.email,
+          }, remember);
+        })
+        .catch(() => {
           btn.disabled = false;
           btn.innerHTML = 'Iniciar sesión';
           showAlert('Email o contraseña incorrectos.', 'error');
-        }
-      }, 800);
+        });
     });
 
     document.getElementById('togglePwd').addEventListener('click', function() {
