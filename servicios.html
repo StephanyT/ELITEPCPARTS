@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Servicios — Elite PC Parts</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/servicios.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+  <header class="header">
+    <div class="header__inner container">
+      <a href="index.html" class="header__logo"><span class="logo-elite">ELITE</span><span class="logo-pc"> PC PARTS</span></a>
+      <nav class="header__nav">
+        <a href="index.html">Inicio</a>
+        <a href="catalogo.html">Productos</a>
+        <a href="servicios.html" class="active">Servicios</a>
+        <a href="pcbuilder.html">PC Builder</a>
+        <a href="contacto.html">Contacto</a>
+      </nav>
+      <div class="header__actions">
+        <div class="search-bar">
+          <input type="text" placeholder="Buscar productos..." />
+          <button><i class="fa fa-search"></i></button>
+        </div>
+        <a href="cuenta.html" class="icon-btn"><i class="fa fa-user"></i></a>
+        <a href="carrito.html" class="icon-btn cart-btn"><i class="fa fa-shopping-cart"></i><span class="cart-badge">0</span></a>
+      </div>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+    <nav class="mobile-nav" id="mobileNav">
+      <a href="index.html">Inicio</a><a href="catalogo.html">Productos</a>
+      <a href="servicios.html">Servicios</a><a href="pcbuilder.html">PC Builder</a><a href="contacto.html">Contacto</a>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- HERO SERVICIOS -->
+    <section class="services-hero">
+      <div class="container">
+        <h1>Nuestros Servicios</h1>
+        <p>Te damos soporte antes, durante y después de tu compra. Nuestro equipo de técnicos certificados está listo para ayudarte.</p>
+      </div>
+    </section>
+
+    <!-- SERVICIOS GRID -->
+    <section class="services-section section">
+      <div class="container">
+        <p class="section-center-sub">¿En qué podemos ayudarte hoy?</p>
+
+        <div class="services-big-grid">
+
+          <div class="service-big-card">
+            <div class="service-big-card__icon"><i class="fa fa-tools"></i></div>
+            <div class="service-big-card__body">
+              <h3>Servicio Técnico</h3>
+              <p>Reparación y mantenimiento de PCs de escritorio y laptops con técnicos certificados. Diagnóstico gratuito en el local.</p>
+              <ul>
+                <li><i class="fa fa-check"></i> Diagnóstico gratis</li>
+                <li><i class="fa fa-check"></i> Presupuesto sin cargo</li>
+                <li><i class="fa fa-check"></i> Garantía de reparación 90 días</li>
+              </ul>
+              <p class="service-price">Desde <strong>$5.000</strong></p>
+              <a href="contacto.html" class="btn btn--primary">Solicitar servicio</a>
+            </div>
+          </div>
+
+          <div class="service-big-card">
+            <div class="service-big-card__icon"><i class="fa fa-desktop"></i></div>
+            <div class="service-big-card__body">
+              <h3>Armado de PC</h3>
+              <p>Nuestros técnicos arman tu PC con los componentes que comprás en el local. Instalación de sistema operativo incluida.</p>
+              <ul>
+                <li><i class="fa fa-check"></i> Armado profesional</li>
+                <li><i class="fa fa-check"></i> Instalación de SO</li>
+                <li><i class="fa fa-check"></i> Test de estabilidad</li>
+              </ul>
+              <p class="service-price">Desde <strong>$8.000</strong></p>
+              <a href="contacto.html" class="btn btn--primary">Solicitar servicio</a>
+            </div>
+          </div>
+
+          <div class="service-big-card">
+            <div class="service-big-card__icon"><i class="fa fa-virus-slash"></i></div>
+            <div class="service-big-card__body">
+              <h3>Limpieza de Virus</h3>
+              <p>Eliminamos virus, malware y programas no deseados. Optimizamos tu equipo para que funcione como nuevo.</p>
+              <ul>
+                <li><i class="fa fa-check"></i> Eliminación completa de malware</li>
+                <li><i class="fa fa-check"></i> Optimización del sistema</li>
+                <li><i class="fa fa-check"></i> Instalación de antivirus</li>
+              </ul>
+              <p class="service-price">Desde <strong>$3.500</strong></p>
+              <a href="contacto.html" class="btn btn--primary">Solicitar servicio</a>
+            </div>
+          </div>
+
+          <div class="service-big-card">
+            <div class="service-big-card__icon"><i class="fa fa-network-wired"></i></div>
+            <div class="service-big-card__body">
+              <h3>Redes y Conectividad</h3>
+              <p>Instalación y configuración de redes domésticas y empresariales. Wi-Fi, cableado estructurado y más.</p>
+              <ul>
+                <li><i class="fa fa-check"></i> Configuración de router</li>
+                <li><i class="fa fa-check"></i> Extensores y repetidores</li>
+                <li><i class="fa fa-check"></i> Cableado estructurado</li>
+              </ul>
+              <p class="service-price">Desde <strong>$4.000</strong></p>
+              <a href="contacto.html" class="btn btn--primary">Solicitar servicio</a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- POR QUÉ ELEGIRNOS -->
+    <section class="why-us section">
+      <div class="container">
+        <h2 class="section-title text-center">¿Por qué elegirnos?</h2>
+        <div class="why-us__grid">
+          <div class="why-card">
+            <i class="fa fa-certificate"></i>
+            <h4>Técnicos certificados</h4>
+            <p>Todo nuestro equipo cuenta con certificaciones y años de experiencia.</p>
+          </div>
+          <div class="why-card">
+            <i class="fa fa-clock"></i>
+            <h4>Entrega rápida</h4>
+            <p>La mayoría de reparaciones listas en menos de 48 horas hábiles.</p>
+          </div>
+          <div class="why-card">
+            <i class="fa fa-shield-alt"></i>
+            <h4>Garantía</h4>
+            <p>Todos nuestros trabajos tienen garantía. Si falla, lo arreglamos sin costo.</p>
+          </div>
+          <div class="why-card">
+            <i class="fa fa-dollar-sign"></i>
+            <h4>Precios claros</h4>
+            <p>Presupuesto previo sin sorpresas. Sabés cuánto vas a pagar antes de confirmar.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HORARIOS -->
+    <section class="schedule section">
+      <div class="container">
+        <div class="schedule__inner">
+          <div class="schedule__text">
+            <h2>Horarios de atención</h2>
+            <p>Podés acercarte al local o coordinar un servicio a domicilio.</p>
+            <table class="schedule-table">
+              <tr><td>Lunes a Viernes</td><td>9:00 — 19:00</td></tr>
+              <tr><td>Sábados</td><td>9:00 — 14:00</td></tr>
+              <tr><td>Domingos y feriados</td><td>Cerrado</td></tr>
+            </table>
+            <p class="schedule-address"><i class="fa fa-map-marker-alt"></i> Av. Corrientes 1234, CABA</p>
+          </div>
+          <div class="schedule__cta">
+            <i class="fa fa-headset cta-icon"></i>
+            <h3>¿Necesitás ayuda ahora?</h3>
+            <p>Contactanos por WhatsApp y te respondemos en minutos.</p>
+            <a href="contacto.html" class="btn btn--primary">
+              <i class="fab fa-whatsapp"></i> Escribinos
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner container">
+      <div class="footer__brand">
+        <p class="footer__logo"><span class="logo-elite">ELITE</span><span class="logo-pc"> PC PARTS</span></p>
+        <p>Tu tienda de confianza para armar la PC de tus sueños.</p>
+        <div class="footer__social">
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-facebook"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+        </div>
+      </div>
+      <div class="footer__links"><h4>Productos</h4><a href="catalogo.html">Ver catálogo</a><a href="pcbuilder.html">PC Builder</a></div>
+      <div class="footer__links"><h4>Servicios</h4><a href="servicios.html">Servicio técnico</a><a href="servicios.html">Armado de PC</a></div>
+      <div class="footer__links"><h4>Contacto</h4><a href="contacto.html"><i class="fa fa-envelope"></i> contacto@elitepcparts.com</a></div>
+    </div>
+    <div class="footer__bottom"><p>&copy; 2024 Elite PC Parts. Todos los derechos reservados.</p></div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

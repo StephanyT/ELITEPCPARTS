@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Catálogo — Elite PC Parts</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/catalogo.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+  <header class="header">
+    <div class="header__inner container">
+      <a href="index.html" class="header__logo">
+        <span class="logo-elite">ELITE</span><span class="logo-pc"> PC PARTS</span>
+      </a>
+      <nav class="header__nav">
+        <a href="index.html">Inicio</a>
+        <a href="catalogo.html" class="active">Productos</a>
+        <a href="servicios.html">Servicios</a>
+        <a href="pcbuilder.html">PC Builder</a>
+        <a href="contacto.html">Contacto</a>
+      </nav>
+      <div class="header__actions">
+        <div class="search-bar">
+          <input type="text" id="searchInput" placeholder="Buscar productos..." />
+          <button><i class="fa fa-search"></i></button>
+        </div>
+        <a href="cuenta.html" class="icon-btn"><i class="fa fa-user"></i></a>
+        <a href="carrito.html" class="icon-btn cart-btn">
+          <i class="fa fa-shopping-cart"></i>
+          <span class="cart-badge">0</span>
+        </a>
+      </div>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+    <nav class="mobile-nav" id="mobileNav">
+      <a href="index.html">Inicio</a>
+      <a href="catalogo.html">Productos</a>
+      <a href="servicios.html">Servicios</a>
+      <a href="pcbuilder.html">PC Builder</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="catalog-page container">
+
+      <!-- SIDEBAR FILTROS -->
+      <aside class="sidebar">
+        <div class="sidebar__header">
+          <h3><i class="fa fa-filter"></i> Filtros</h3>
+          <button id="clearFilters" class="clear-btn">Limpiar</button>
+        </div>
+
+        <div class="filter-group">
+          <h4>Categoría</h4>
+          <label><input type="checkbox" name="cat" value="Procesadores" checked /> Procesadores</label>
+          <label><input type="checkbox" name="cat" value="Placas de Video" /> Placas de Video</label>
+          <label><input type="checkbox" name="cat" value="Memorias RAM" /> Memorias RAM</label>
+          <label><input type="checkbox" name="cat" value="Almacenamiento" /> Almacenamiento</label>
+          <label><input type="checkbox" name="cat" value="Placas Madre" /> Placas Madre</label>
+          <label><input type="checkbox" name="cat" value="Fuentes" /> Fuentes</label>
+          <label><input type="checkbox" name="cat" value="Cooling" /> Cooling</label>
+          <label><input type="checkbox" name="cat" value="Periféricos" /> Periféricos</label>
+        </div>
+
+        <div class="filter-group">
+          <h4>Marca</h4>
+          <label><input type="checkbox" name="brand" value="Intel" /> Intel</label>
+          <label><input type="checkbox" name="brand" value="AMD" /> AMD</label>
+          <label><input type="checkbox" name="brand" value="NVIDIA" /> NVIDIA</label>
+          <label><input type="checkbox" name="brand" value="Corsair" /> Corsair</label>
+          <label><input type="checkbox" name="brand" value="Samsung" /> Samsung</label>
+          <label><input type="checkbox" name="brand" value="ASUS" /> ASUS</label>
+          <label><input type="checkbox" name="brand" value="MSI" /> MSI</label>
+        </div>
+
+        <div class="filter-group">
+          <h4>Precio</h4>
+          <div class="price-range">
+            <div class="price-inputs">
+              <input type="number" id="priceMin" placeholder="Mín" min="0" />
+              <span>—</span>
+              <input type="number" id="priceMax" placeholder="Máx" min="0" />
+            </div>
+            <input type="range" id="priceSlider" min="0" max="500000" value="500000" step="5000" />
+            <p class="price-label">Hasta: <strong id="priceSliderVal">$500.000</strong></p>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <h4>Calificación</h4>
+          <label><input type="radio" name="rating" value="0" checked /> Todas</label>
+          <label><input type="radio" name="rating" value="4" /> 4★ o más</label>
+          <label><input type="radio" name="rating" value="4.5" /> 4.5★ o más</label>
+        </div>
+
+        <button class="btn btn--primary" id="applyFilters" style="width:100%;margin-top:.5rem">Aplicar filtros</button>
+      </aside>
+
+      <!-- CONTENIDO PRINCIPAL -->
+      <div class="catalog-main">
+        <div class="catalog-toolbar">
+          <p class="results-count"><span id="resultCount">0</span> productos encontrados</p>
+          <div class="toolbar-right">
+            <select id="sortSelect">
+              <option value="default">Ordenar por: Relevancia</option>
+              <option value="price-asc">Precio: menor a mayor</option>
+              <option value="price-desc">Precio: mayor a menor</option>
+              <option value="rating">Mejor calificados</option>
+              <option value="name">Nombre A-Z</option>
+            </select>
+            <div class="view-toggle">
+              <button class="view-btn active" id="gridView" title="Cuadrícula"><i class="fa fa-th"></i></button>
+              <button class="view-btn" id="listView" title="Lista"><i class="fa fa-list"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="products__grid" id="catalogGrid"></div>
+
+        <!-- PAGINACIÓN -->
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner container">
+      <div class="footer__brand">
+        <p class="footer__logo"><span class="logo-elite">ELITE</span><span class="logo-pc"> PC PARTS</span></p>
+        <p>Tu tienda de confianza para armar la PC de tus sueños.</p>
+      </div>
+      <div class="footer__links">
+        <h4>Productos</h4>
+        <a href="#">Procesadores</a><a href="#">Placas de video</a><a href="#">Memorias</a>
+      </div>
+      <div class="footer__links">
+        <h4>Servicios</h4>
+        <a href="servicios.html">Servicio técnico</a><a href="pcbuilder.html">PC Builder</a>
+      </div>
+      <div class="footer__links">
+        <h4>Contacto</h4>
+        <a href="contacto.html"><i class="fa fa-envelope"></i> contacto@elitepcparts.com</a>
+      </div>
+    </div>
+    <div class="footer__bottom"><p>&copy; 2024 Elite PC Parts. Todos los derechos reservados.</p></div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/catalogo.js"></script>
+</body>
+</html>

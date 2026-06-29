@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elite PC Parts</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header__inner container">
+      <a href="index.html" class="header__logo">
+        <span class="logo-elite">ELITE</span><span class="logo-pc"> PC PARTS</span>
+      </a>
+
+      <nav class="header__nav">
+        <a href="index.html" class="active">Inicio</a>
+        <a href="catalogo.html">Productos</a>
+        <a href="servicios.html">Servicios</a>
+        <a href="pcbuilder.html">PC Builder</a>
+        <a href="contacto.html">Contacto</a>
+      </nav>
+
+      <div class="header__actions">
+        <div class="search-bar">
+          <input type="text" placeholder="Buscar productos..." id="headerSearch" />
+          <button onclick="searchRedirect()"><i class="fa fa-search"></i></button>
+        </div>
+        <a href="cuenta.html" class="icon-btn" title="Mi cuenta"><i class="fa fa-user"></i></a>
+        <a href="carrito.html" class="icon-btn cart-btn" title="Carrito">
+          <i class="fa fa-shopping-cart"></i>
+          <span class="cart-badge">0</span>
+        </a>
+      </div>
+
+      <button class="hamburger" id="hamburger" aria-label="Abrir menú">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+    <!-- Mobile nav -->
+    <nav class="mobile-nav" id="mobileNav">
+      <a href="index.html">Inicio</a>
+      <a href="catalogo.html">Productos</a>
+      <a href="servicios.html">Servicios</a>
+      <a href="pcbuilder.html">PC Builder</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero__content container">
+        <div class="hero__text">
+          <p class="hero__tag">La mejor tienda de componentes</p>
+          <h1>Arma tu PC<br /><span>de tus sueños</span></h1>
+          <p class="hero__sub">Encontrá los mejores componentes, placas, procesadores y periféricos al mejor precio. Envío a todo el país.</p>
+          <div class="hero__btns">
+            <a href="catalogo.html" class="btn btn--primary">Ver productos</a>
+            <a href="pcbuilder.html" class="btn btn--outline">PC Builder</a>
+          </div>
+          <div class="hero__stats">
+            <div class="stat">
+              <strong>+500</strong>
+              <span>Productos</span>
+            </div>
+            <div class="stat">
+              <strong>+3000</strong>
+              <span>Clientes</span>
+            </div>
+            <div class="stat">
+              <strong>5★</strong>
+              <span>Calificación</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero__image">
+          <div class="img-placeholder hero-img">
+            <i class="fa fa-desktop"></i>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CATEGORÍAS -->
+    <section class="categories section">
+      <div class="container">
+        <h2 class="section-title">Explorá por categoría</h2>
+        <div class="categories__grid">
+          <a href="catalogo.html?cat=Procesadores" class="category-card">
+            <i class="fa fa-microchip"></i>
+            <span>Procesadores</span>
+          </a>
+          <a href="catalogo.html?cat=Memorias+RAM" class="category-card">
+            <i class="fa fa-memory"></i>
+            <span>Memorias RAM</span>
+          </a>
+          <a href="catalogo.html?cat=Almacenamiento" class="category-card">
+            <i class="fa fa-hdd"></i>
+            <span>Almacenamiento</span>
+          </a>
+          <a href="catalogo.html?cat=Placas+de+Video" class="category-card">
+            <i class="fa fa-tv"></i>
+            <span>Placas de Video</span>
+          </a>
+          <a href="catalogo.html?cat=Placas+Madre" class="category-card">
+            <i class="fa fa-server"></i>
+            <span>Placas Madre</span>
+          </a>
+          <a href="catalogo.html?cat=Fuentes" class="category-card">
+            <i class="fa fa-plug"></i>
+            <span>Fuentes</span>
+          </a>
+          <a href="catalogo.html?cat=Cooling" class="category-card">
+            <i class="fa fa-wind"></i>
+            <span>Cooling</span>
+          </a>
+          <a href="catalogo.html?cat=Periféricos" class="category-card">
+            <i class="fa fa-keyboard"></i>
+            <span>Periféricos</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRODUCTOS DESTACADOS -->
+    <section class="featured section">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Productos destacados</h2>
+          <a href="catalogo.html" class="link-more">Ver todos <i class="fa fa-arrow-right"></i></a>
+        </div>
+        <div class="products__grid" id="productsGrid">
+          <!-- generados por JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- PC BUILDER BANNER -->
+    <section class="builder-banner">
+      <div class="container">
+        <div class="builder-banner__inner">
+          <div class="builder-banner__text">
+            <span class="badge">Nuevo</span>
+            <h2>PC Builder Inteligente</h2>
+            <p>Armá tu PC ideal paso a paso. Nuestro sistema verifica compatibilidad entre componentes en tiempo real para que no cometas errores.</p>
+            <ul class="builder-features">
+              <li><i class="fa fa-check-circle"></i> Verificación de compatibilidad automática</li>
+              <li><i class="fa fa-check-circle"></i> Presupuesto en tiempo real</li>
+              <li><i class="fa fa-check-circle"></i> Recomendaciones inteligentes</li>
+            </ul>
+            <a href="pcbuilder.html" class="btn btn--primary">Empezar a armar</a>
+          </div>
+          <div class="builder-banner__image">
+            <div class="img-placeholder builder-img">
+              <i class="fa fa-tools"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SERVICIOS -->
+    <section class="services section">
+      <div class="container">
+        <h2 class="section-title">Nuestros Servicios</h2>
+        <p class="section-sub">Te damos soporte antes, durante y después de tu compra</p>
+        <div class="services__grid">
+          <div class="service-card">
+            <div class="service-card__icon"><i class="fa fa-tools"></i></div>
+            <h3>Servicio Técnico</h3>
+            <p>Reparación y mantenimiento de equipos con técnicos certificados.</p>
+            <a href="servicios.html" class="link-more">Solicitar servicio</a>
+          </div>
+          <div class="service-card">
+            <div class="service-card__icon"><i class="fa fa-truck"></i></div>
+            <h3>Envío a domicilio</h3>
+            <p>Enviamos a todo el país con seguimiento en tiempo real.</p>
+            <a href="servicios.html" class="link-more">Más información</a>
+          </div>
+          <div class="service-card">
+            <div class="service-card__icon"><i class="fa fa-headset"></i></div>
+            <h3>Soporte 24/7</h3>
+            <p>Nuestro equipo está disponible para ayudarte cuando lo necesités.</p>
+            <a href="contacto.html" class="link-more">Contactar</a>
+          </div>
+          <div class="service-card">
+            <div class="service-card__icon"><i class="fa fa-shield-alt"></i></div>
+            <h3>Garantía</h3>
+            <p>Todos nuestros productos tienen garantía oficial del fabricante.</p>
+            <a href="servicios.html" class="link-more">Ver garantías</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BENEFICIOS -->
+    <section class="benefits section">
+      <div class="container">
+        <div class="benefits__grid">
+          <div class="benefit">
+            <i class="fa fa-shipping-fast"></i>
+            <div>
+              <strong>Envío gratis</strong>
+              <span>En compras mayores a $50.000</span>
+            </div>
+          </div>
+          <div class="benefit">
+            <i class="fa fa-undo"></i>
+            <div>
+              <strong>Devolución fácil</strong>
+              <span>30 días para cambios</span>
+            </div>
+          </div>
+          <div class="benefit">
+            <i class="fa fa-lock"></i>
+            <div>
+              <strong>Pago seguro</strong>
+              <span>Múltiples medios de pago</span>
+            </div>
+          </div>
+          <div class="benefit">
+            <i class="fa fa-star"></i>
+            <div>
+              <strong>Productos originales</strong>
+              <span>100% garantizados</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer__inner container">
+      <div class="footer__brand">
+        <p class="footer__logo"><span class="logo-elite">ELITE</span><span class="logo-pc"> PC PARTS</span></p>
+        <p>Tu tienda de confianza para armar la PC de tus sueños.</p>
+        <div class="footer__social">
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-facebook"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-youtube"></i></a>
+        </div>
+      </div>
+      <div class="footer__links">
+        <h4>Productos</h4>
+        <a href="catalogo.html?cat=Procesadores">Procesadores</a>
+        <a href="catalogo.html?cat=Placas+de+Video">Placas de video</a>
+        <a href="catalogo.html?cat=Memorias+RAM">Memorias</a>
+        <a href="catalogo.html?cat=Almacenamiento">Almacenamiento</a>
+        <a href="catalogo.html?cat=Periféricos">Periféricos</a>
+      </div>
+      <div class="footer__links">
+        <h4>Servicios</h4>
+        <a href="servicios.html">Servicio técnico</a>
+        <a href="pcbuilder.html">PC Builder</a>
+        <a href="servicios.html">Envíos</a>
+        <a href="servicios.html">Garantía</a>
+      </div>
+      <div class="footer__links">
+        <h4>Contacto</h4>
+        <a href="contacto.html"><i class="fa fa-envelope"></i> contacto@elitepcparts.com</a>
+        <a href="contacto.html"><i class="fa fa-phone"></i> +54 11 1234-5678</a>
+        <a href="contacto.html"><i class="fa fa-map-marker-alt"></i> Buenos Aires, Argentina</a>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <p>&copy; 2024 Elite PC Parts. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    function searchRedirect() {
+      const q = document.getElementById('headerSearch').value.trim();
+      if (q) window.location.href = 'catalogo.html?q=' + encodeURIComponent(q);
+    }
+    document.getElementById('headerSearch').addEventListener('keydown', e => {
+      if (e.key === 'Enter') searchRedirect();
+    });
+  </script>
+</body>
+</html>
