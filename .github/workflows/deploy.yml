@@ -96,6 +96,25 @@ jobs:
               --server-side-encryption-configuration '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}'
           fi
 
+      # A stack whose first CreateStack failed is left in ROLLBACK_COMPLETE (or
+      # REVIEW_IN_PROGRESS). CloudFormation cannot update a stack in these states,
+      # so `deploy` would fail with "is in ROLLBACK_COMPLETE state and can not be
+      # updated". Since the stack never successfully created any resources in that
+      # state, it is safe to delete it and let the next step recreate it.
+      - name: Clean up failed stack (if in an uncreatable state)
+        run: |
+          STATUS=$(aws cloudformation describe-stacks \
+            --stack-name "$STACK_NAME" \
+            --query "Stacks[0].StackStatus" \
+            --output text 2>/dev/null || echo "DOES_NOT_EXIST")
+          echo "Current stack status: $STATUS"
+          if [ "$STATUS" = "ROLLBACK_COMPLETE" ] || [ "$STATUS" = "REVIEW_IN_PROGRESS" ]; then
+            echo "Deleting stack $STACK_NAME (status $STATUS) so it can be recreated"
+            aws cloudformation delete-stack --stack-name "$STACK_NAME"
+            aws cloudformation wait stack-delete-complete --stack-name "$STACK_NAME"
+            echo "Stack deleted"
+          fi
+
       - name: Provision infrastructure (idempotent)
         run: |
           aws cloudformation deploy \
