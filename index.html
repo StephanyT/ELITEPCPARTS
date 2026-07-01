@@ -97,35 +97,35 @@
       <div class="container">
         <h2 class="section-title">Explorá por categoría</h2>
         <div class="categories__grid">
-          <a href="catalogo.html?cat=Procesadores" class="category-card">
+          <a href="src/pages/catalogo.html?cat=Procesadores" class="category-card">
             <i class="fa fa-microchip"></i>
             <span>Procesadores</span>
           </a>
-          <a href="catalogo.html?cat=Memorias+RAM" class="category-card">
+          <a href="src/pages/catalogo.html?cat=Memorias+RAM" class="category-card">
             <i class="fa fa-memory"></i>
             <span>Memorias RAM</span>
           </a>
-          <a href="catalogo.html?cat=Almacenamiento" class="category-card">
+          <a href="src/pages/catalogo.html?cat=Almacenamiento" class="category-card">
             <i class="fa fa-hdd"></i>
             <span>Almacenamiento</span>
           </a>
-          <a href="catalogo.html?cat=Placas+de+Video" class="category-card">
+          <a href="src/pages/catalogo.html?cat=Placas+de+Video" class="category-card">
             <i class="fa fa-tv"></i>
             <span>Placas de Video</span>
           </a>
-          <a href="catalogo.html?cat=Placas+Madre" class="category-card">
+          <a href="src/pages/catalogo.html?cat=Placas+Madre" class="category-card">
             <i class="fa fa-server"></i>
             <span>Placas Madre</span>
           </a>
-          <a href="catalogo.html?cat=Fuentes" class="category-card">
+          <a href="src/pages/catalogo.html?cat=Fuentes" class="category-card">
             <i class="fa fa-plug"></i>
             <span>Fuentes</span>
           </a>
-          <a href="catalogo.html?cat=Cooling" class="category-card">
+          <a href="src/pages/catalogo.html?cat=Cooling" class="category-card">
             <i class="fa fa-wind"></i>
             <span>Cooling</span>
           </a>
-          <a href="catalogo.html?cat=Periféricos" class="category-card">
+          <a href="src/pages/catalogo.html?cat=Periféricos" class="category-card">
             <i class="fa fa-keyboard"></i>
             <span>Periféricos</span>
           </a>
@@ -258,11 +258,11 @@
       </div>
       <div class="footer__links">
         <h4>Productos</h4>
-        <a href="catalogo.html?cat=Procesadores">Procesadores</a>
-        <a href="catalogo.html?cat=Placas+de+Video">Placas de video</a>
-        <a href="catalogo.html?cat=Memorias+RAM">Memorias</a>
-        <a href="catalogo.html?cat=Almacenamiento">Almacenamiento</a>
-        <a href="catalogo.html?cat=Periféricos">Periféricos</a>
+        <a href="src/pages/catalogo.html?cat=Procesadores">Procesadores</a>
+        <a href="src/pages/catalogo.html?cat=Placas+de+Video">Placas de video</a>
+        <a href="src/pages/catalogo.html?cat=Memorias+RAM">Memorias</a>
+        <a href="src/pages/catalogo.html?cat=Almacenamiento">Almacenamiento</a>
+        <a href="src/pages/catalogo.html?cat=Periféricos">Periféricos</a>
       </div>
       <div class="footer__links">
         <h4>Servicios</h4>
@@ -289,7 +289,7 @@
   <script>
     function searchRedirect() {
       const q = document.getElementById('headerSearch').value.trim();
-      if (q) window.location.href = 'catalogo.html?q=' + encodeURIComponent(q);
+      if (q) window.location.href = 'src/pages/catalogo.html?q=' + encodeURIComponent(q);
     }
     document.getElementById('headerSearch').addEventListener('keydown', e => {
       if (e.key === 'Enter') searchRedirect();
