@@ -103,7 +103,7 @@ function updateHeaderAuth(session) {
 
 // ---------- logout ----------
 function logout() {
-  const done = () => { clearSession(); localStorage.removeItem('epc_cart'); location.href = HOME_HREF; };
+  const done = () => { clearSession(); localStorage.removeItem('epc_cart'); localStorage.removeItem('epc_cart_owner'); location.href = HOME_HREF; };
   if (window.auth) auth.signOut().then(done).catch(done);
   else done();
 }
@@ -154,12 +154,29 @@ async function syncCartOnLogin(uid) {
     const remote = doc.exists && Array.isArray(doc.data().cart) ? doc.data().cart : [];
     const local  = (typeof cart !== 'undefined' && Array.isArray(cart)) ? cart : [];
 
-    const merged = mergeCarts(local, remote);
-    cart = merged;
-    localStorage.setItem('epc_cart', JSON.stringify(cart));
+    // The guest-cart sum-merge must run ONCE per account on this device. Because
+    // onAuthStateChanged fires on every page load, re-summing local+remote here
+    // would double every quantity on each navigation (that's what caused the
+    // runaway cart totals). We only fold the guest cart into the account the
+    // first time this device's cart meets the account AND the two actually differ:
+    //   • epc_cart_owner === uid -> this browser's cart already belongs to the
+    //     account and is kept mirrored by saveCart(), so just adopt the online cart.
+    //   • local deep-equals remote -> nothing new to fold in (steady mirrored
+    //     state), so adopt the online cart instead of summing it with itself.
+    const alreadyOwned = localStorage.getItem('epc_cart_owner') === uid;
+    const sameCart     = JSON.stringify(local) === JSON.stringify(remote);
 
-    // Persist the merged union so the online cart stays in sync.
-    await db.collection('usuarios').doc(uid).set({ cart: merged }, { merge: true });
+    if (alreadyOwned || sameCart) {
+      cart = remote;
+      localStorage.setItem('epc_cart', JSON.stringify(cart));
+    } else {
+      const merged = mergeCarts(local, remote);
+      cart = merged;
+      localStorage.setItem('epc_cart', JSON.stringify(cart));
+      // Persist the one-time merged union so the online cart stays in sync.
+      await db.collection('usuarios').doc(uid).set({ cart: merged }, { merge: true });
+    }
+    localStorage.setItem('epc_cart_owner', uid);
 
     if (typeof updateCartBadge === 'function') updateCartBadge();
     if (typeof renderCart === 'function') renderCart();   // refresh the carrito page if open

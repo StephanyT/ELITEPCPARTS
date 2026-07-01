@@ -9,15 +9,18 @@ function renderCart() {
   const itemsEl  = document.getElementById('cartItems');
   const emptyEl  = document.getElementById('cartEmpty');
   const layoutEl = document.querySelector('.cart-layout');
+  const clearEl  = document.getElementById('clearCartBtn');
 
   if (!cart.length) {
     itemsEl?.parentElement && (layoutEl.style.display = 'none');
     emptyEl.style.display = 'flex';
+    if (clearEl) clearEl.style.display = 'none';
     return;
   }
 
   layoutEl.style.display = 'grid';
   emptyEl.style.display  = 'none';
+  if (clearEl) clearEl.style.display = 'inline-flex';
 
   itemsEl.innerHTML = cart.map(item => `
     <div class="cart-item" data-id="${item.id}">
@@ -73,6 +76,18 @@ function removeItem(id) {
   renderCart();
   showToast('Producto eliminado del carrito');
 }
+
+function emptyCart() {
+  if (!cart.length) return;
+  if (!confirm('¿Vaciar todo el carrito?')) return;
+  cart = [];
+  discount = 0;
+  saveCart();        // mirrors the empty cart to Firestore when logged in
+  renderCart();
+  showToast('Carrito vaciado');
+}
+
+document.getElementById('clearCartBtn')?.addEventListener('click', emptyCart);
 
 document.getElementById('applyCoupon')?.addEventListener('click', () => {
   const code = document.getElementById('couponInput').value.trim().toUpperCase();
