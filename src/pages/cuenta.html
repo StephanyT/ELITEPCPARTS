@@ -4,17 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mi Cuenta — Elite PC Parts</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/cuenta.css" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/cuenta.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 <body>
 
   <header class="header">
     <div class="header__inner container">
-      <a href="index.html" class="header__logo"><span class="logo-elite">ELITE</span><span class="logo-pc"> PC PARTS</span></a>
+      <a href="../../index.html" class="header__logo"><span class="logo-elite">ELITE</span><span class="logo-pc"> PC PARTS</span></a>
       <nav class="header__nav">
-        <a href="index.html">Inicio</a>
+        <a href="../../index.html">Inicio</a>
         <a href="catalogo.html">Productos</a>
         <a href="servicios.html">Servicios</a>
         <a href="pcbuilder.html">PC Builder</a>
@@ -31,7 +31,7 @@
       <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
     </div>
     <nav class="mobile-nav" id="mobileNav">
-      <a href="index.html">Inicio</a><a href="catalogo.html">Productos</a>
+      <a href="../../index.html">Inicio</a><a href="catalogo.html">Productos</a>
       <a href="servicios.html">Servicios</a><a href="pcbuilder.html">PC Builder</a><a href="contacto.html">Contacto</a>
     </nav>
   </header>
@@ -168,7 +168,7 @@
                   <th></th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="ordersBody">
                 <tr>
                   <td>#00142</td><td>20/06/2024</td><td>RTX 4070 Ti, Corsair 32GB</td>
                   <td>$493.500</td><td><span class="badge-status delivered">Entregado</span></td>
@@ -256,29 +256,29 @@
             <div class="form-row">
               <div class="form-group">
                 <label>Nombre</label>
-                <input type="text" value="Usuario" />
+                <input type="text" id="pfFirst" />
               </div>
               <div class="form-group">
                 <label>Apellido</label>
-                <input type="text" value="Demo" />
+                <input type="text" id="pfLast" />
               </div>
             </div>
             <div class="form-group">
               <label>Email</label>
-              <input type="email" value="usuario@email.com" />
+              <input type="email" id="pfEmail" readonly />
             </div>
             <div class="form-group">
               <label>Teléfono</label>
-              <input type="tel" placeholder="+54 11 xxxx-xxxx" />
+              <input type="tel" id="pfPhone" placeholder="+54 11 xxxx-xxxx" />
             </div>
             <div class="form-row">
               <div class="form-group">
                 <label>Nueva contraseña</label>
-                <input type="password" placeholder="••••••••" />
+                <input type="password" id="pfPass" placeholder="Dejá en blanco para no cambiarla" />
               </div>
               <div class="form-group">
                 <label>Confirmar contraseña</label>
-                <input type="password" placeholder="••••••••" />
+                <input type="password" id="pfPass2" placeholder="••••••••" />
               </div>
             </div>
             <button type="submit" class="btn btn--primary">Guardar cambios</button>
@@ -323,12 +323,10 @@
     </div>
     <div class="footer__bottom"><p>&copy; 2024 Elite PC Parts. Todos los derechos reservados.</p></div>
   </footer>
-  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-init.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/main.js"></script>
-  <script src="js/cuenta.js"></script>
+  <script src="../js/firebase-init.js"></script>
+  <script src="../js/data.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/cuenta.js"></script>
 </body>
 </html>

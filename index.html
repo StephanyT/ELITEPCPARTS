@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Elite PC Parts</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="src/css/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
+
 <body>
 
   <!-- HEADER -->
@@ -18,10 +20,10 @@
 
       <nav class="header__nav">
         <a href="index.html" class="active">Inicio</a>
-        <a href="catalogo.html">Productos</a>
-        <a href="servicios.html">Servicios</a>
-        <a href="pcbuilder.html">PC Builder</a>
-        <a href="contacto.html">Contacto</a>
+        <a href="src/pages/catalogo.html">Productos</a>
+        <a href="src/pages/servicios.html">Servicios</a>
+        <a href="src/pages/pcbuilder.html">PC Builder</a>
+        <a href="src/pages/contacto.html">Contacto</a>
       </nav>
 
       <div class="header__actions">
@@ -29,8 +31,8 @@
           <input type="text" placeholder="Buscar productos..." id="headerSearch" />
           <button onclick="searchRedirect()"><i class="fa fa-search"></i></button>
         </div>
-        <a href="cuenta.html" class="icon-btn" title="Mi cuenta"><i class="fa fa-user"></i></a>
-        <a href="carrito.html" class="icon-btn cart-btn" title="Carrito">
+        <a href="src/pages/cuenta.html" class="icon-btn" title="Mi cuenta"><i class="fa fa-user"></i></a>
+        <a href="src/pages/carrito.html" class="icon-btn cart-btn" title="Carrito">
           <i class="fa fa-shopping-cart"></i>
           <span class="cart-badge">0</span>
         </a>
@@ -39,16 +41,18 @@
       <button class="hamburger" id="hamburger" aria-label="Abrir menú">
         <span></span><span></span><span></span>
       </button>
+
+    
     </div>
 
     <!-- Mobile nav -->
-    <nav class="mobile-nav" id="mobileNav">
+    <nav class=" mobile-nav" id="mobileNav">
       <a href="index.html">Inicio</a>
-      <a href="catalogo.html">Productos</a>
-      <a href="servicios.html">Servicios</a>
-      <a href="pcbuilder.html">PC Builder</a>
-      <a href="contacto.html">Contacto</a>
-    </nav>
+      <a href="src/pages/catalogo.html">Productos</a>
+      <a href="src/pages/servicios.html">Servicios</a>
+      <a href="src/pages/pcbuilder.html">PC Builder</a>
+      <a href="src/pages/contacto.html">Contacto</a>
+      </nav>
   </header>
 
   <main>
@@ -59,10 +63,11 @@
         <div class="hero__text">
           <p class="hero__tag">La mejor tienda de componentes</p>
           <h1>Arma tu PC<br /><span>de tus sueños</span></h1>
-          <p class="hero__sub">Encontrá los mejores componentes, placas, procesadores y periféricos al mejor precio. Envío a todo el país.</p>
+          <p class="hero__sub">Encontrá los mejores componentes, placas, procesadores y periféricos al mejor precio.
+            Envío a todo el país.</p>
           <div class="hero__btns">
-            <a href="catalogo.html" class="btn btn--primary">Ver productos</a>
-            <a href="pcbuilder.html" class="btn btn--outline">PC Builder</a>
+            <a href="src/pages/catalogo.html" class="btn btn--primary">Ver productos</a>
+            <a href="src/pages/pcbuilder.html" class="btn btn--outline">PC Builder</a>
           </div>
           <div class="hero__stats">
             <div class="stat">
@@ -133,7 +138,7 @@
       <div class="container">
         <div class="section-header">
           <h2 class="section-title">Productos destacados</h2>
-          <a href="catalogo.html" class="link-more">Ver todos <i class="fa fa-arrow-right"></i></a>
+          <a href="src/pages/catalogo.html" class="link-more">Ver todos <i class="fa fa-arrow-right"></i></a>
         </div>
         <div class="products__grid" id="productsGrid">
           <!-- generados por JS -->
@@ -148,13 +153,14 @@
           <div class="builder-banner__text">
             <span class="badge">Nuevo</span>
             <h2>PC Builder Inteligente</h2>
-            <p>Armá tu PC ideal paso a paso. Nuestro sistema verifica compatibilidad entre componentes en tiempo real para que no cometas errores.</p>
+            <p>Armá tu PC ideal paso a paso. Nuestro sistema verifica compatibilidad entre componentes en tiempo real
+              para que no cometas errores.</p>
             <ul class="builder-features">
               <li><i class="fa fa-check-circle"></i> Verificación de compatibilidad automática</li>
               <li><i class="fa fa-check-circle"></i> Presupuesto en tiempo real</li>
               <li><i class="fa fa-check-circle"></i> Recomendaciones inteligentes</li>
             </ul>
-            <a href="pcbuilder.html" class="btn btn--primary">Empezar a armar</a>
+            <a href="src/pages/pcbuilder.html" class="btn btn--primary">Empezar a armar</a>
           </div>
           <div class="builder-banner__image">
             <div class="img-placeholder builder-img">
@@ -175,25 +181,25 @@
             <div class="service-card__icon"><i class="fa fa-tools"></i></div>
             <h3>Servicio Técnico</h3>
             <p>Reparación y mantenimiento de equipos con técnicos certificados.</p>
-            <a href="servicios.html" class="link-more">Solicitar servicio</a>
+            <a href="src/pages/servicios.html" class="link-more">Solicitar servicio</a>
           </div>
           <div class="service-card">
             <div class="service-card__icon"><i class="fa fa-truck"></i></div>
             <h3>Envío a domicilio</h3>
             <p>Enviamos a todo el país con seguimiento en tiempo real.</p>
-            <a href="servicios.html" class="link-more">Más información</a>
+            <a href="src/pages/servicios.html" class="link-more">Más información</a>
           </div>
           <div class="service-card">
             <div class="service-card__icon"><i class="fa fa-headset"></i></div>
             <h3>Soporte 24/7</h3>
             <p>Nuestro equipo está disponible para ayudarte cuando lo necesités.</p>
-            <a href="contacto.html" class="link-more">Contactar</a>
+            <a href="src/pages/contacto.html" class="link-more">Contactar</a>
           </div>
           <div class="service-card">
             <div class="service-card__icon"><i class="fa fa-shield-alt"></i></div>
             <h3>Garantía</h3>
             <p>Todos nuestros productos tienen garantía oficial del fabricante.</p>
-            <a href="servicios.html" class="link-more">Ver garantías</a>
+            <a href="src/pages/servicios.html" class="link-more">Ver garantías</a>
           </div>
         </div>
       </div>
@@ -260,28 +266,26 @@
       </div>
       <div class="footer__links">
         <h4>Servicios</h4>
-        <a href="servicios.html">Servicio técnico</a>
-        <a href="pcbuilder.html">PC Builder</a>
-        <a href="servicios.html">Envíos</a>
-        <a href="servicios.html">Garantía</a>
+        <a href="src/pages/servicios.html">Servicio técnico</a>
+        <a href="src/pages/pcbuilder.html">PC Builder</a>
+        <a href="src/pages/servicios.html">Envíos</a>
+        <a href="src/pages/servicios.html">Garantía</a>
       </div>
       <div class="footer__links">
         <h4>Contacto</h4>
-        <a href="contacto.html"><i class="fa fa-envelope"></i> contacto@elitepcparts.com</a>
-        <a href="contacto.html"><i class="fa fa-phone"></i> +54 11 1234-5678</a>
-        <a href="contacto.html"><i class="fa fa-map-marker-alt"></i> Buenos Aires, Argentina</a>
+        <a href="src/pages/contacto.html"><i class="fa fa-envelope"></i> contacto@elitepcparts.com</a>
+        <a href="src/pages/contacto.html"><i class="fa fa-phone"></i> +54 11 1234-5678</a>
+        <a href="src/pages/contacto.html"><i class="fa fa-map-marker-alt"></i> Buenos Aires, Argentina</a>
       </div>
     </div>
     <div class="footer__bottom">
       <p>&copy; 2024 Elite PC Parts. Todos los derechos reservados.</p>
     </div>
   </footer>
-  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-init.js"></script>
-  <script src="js/main.js"></script>
-  <script src="js/auth.js"></script>
+  <script src="src/js/firebase-init.js"></script>
+  <script src="src/js/data.js"></script>
+  <script src="src/js/main.js"></script>
+  <script src="src/js/auth.js"></script>
   <script>
     function searchRedirect() {
       const q = document.getElementById('headerSearch').value.trim();
@@ -292,4 +296,5 @@
     });
   </script>
 </body>
+
 </html>

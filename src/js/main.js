@@ -10,23 +10,21 @@ hamburger?.addEventListener('click', () => {
   mobileNav.classList.toggle('open');
 });
 
-// ---------- Sample products data ----------
-const products = [
-  { id: 1, name: 'Intel Core i9-13900K', category: 'Procesadores', price: 189999, rating: 4.8, reviews: 124 },
-  { id: 2, name: 'AMD Ryzen 7 7700X', category: 'Procesadores', price: 142000, rating: 4.7, reviews: 98 },
-  { id: 3, name: 'NVIDIA RTX 4070 Ti 12GB', category: 'Placas de Video', price: 425000, rating: 4.9, reviews: 76 },
-  { id: 4, name: 'Corsair Vengeance 32GB DDR5', category: 'Memorias RAM', price: 68500, rating: 4.6, reviews: 210 },
-  { id: 5, name: 'Samsung 980 Pro 1TB NVMe', category: 'Almacenamiento', price: 54000, rating: 4.8, reviews: 305 },
-  { id: 6, name: 'ASUS ROG Strix B650-E', category: 'Placas Madre', price: 135000, rating: 4.7, reviews: 55 },
-  { id: 7, name: 'Corsair RM850x 850W Gold', category: 'Fuentes', price: 72000, rating: 4.9, reviews: 180 },
-  { id: 8, name: 'be quiet! Dark Rock Pro 4', category: 'Cooling', price: 38000, rating: 4.6, reviews: 92 },
-];
+// ---------- Products data ----------
+// Populated from Firestore (see src/js/data.js). Page scripts assign the loaded
+// catalog into this shared global so addToCart() can resolve products by id on
+// every page. Starts empty and fills in once EPC.load() resolves.
+let products = [];
 
 let cart = JSON.parse(localStorage.getItem('epc_cart') || '[]');
 
 function saveCart() {
   localStorage.setItem('epc_cart', JSON.stringify(cart));
   updateCartBadge();
+  // Mirror the cart to Firestore whenever a user is logged in (see auth.js).
+  if (window.EPCAuth && EPCAuth.uid && window.db) {
+    db.collection('usuarios').doc(EPCAuth.uid).set({ cart }, { merge: true }).catch(() => {});
+  }
 }
 
 function updateCartBadge() {
@@ -98,14 +96,24 @@ function formatPrice(n) {
   return '$' + n.toLocaleString('es-AR');
 }
 
+// Reusable product thumbnail. Falls back to the box icon if the image fails to load.
+function productImg(p, cls = 'product-card__img') {
+  return `<div class="${cls}"><img src="${p.image}" alt="${p.name}" loading="lazy" onerror="imgError(this)"></div>`;
+}
+
+function imgError(img) {
+  const box = img.parentElement;
+  box.classList.add('img-placeholder');
+  box.innerHTML = '<i class="fa fa-box-open"></i>';
+}
+
 function renderProducts() {
   const grid = document.getElementById('productsGrid');
   if (!grid) return;
-  grid.innerHTML = products.map(p => `
-    <article class="product-card" data-id="${p.id}">
-      <div class="img-placeholder product-card__img">
-        <i class="fa fa-box-open"></i>
-      </div>
+  // Home page shows a "featured" subset — the first 8 of the loaded catalog.
+  grid.innerHTML = products.slice(0, 8).map(p => `
+    <article class="product-card" data-id="${p.id}" onclick="window.location='src/pages/producto.html?id=${p.id}'">
+      ${productImg(p)}
       <div class="product-card__body">
         <span class="product-card__cat">${p.category}</span>
         <p class="product-card__name">${p.name}</p>
@@ -115,7 +123,7 @@ function renderProducts() {
         </div>
         <div class="product-card__footer">
           <span class="product-card__price">${formatPrice(p.price)}</span>
-          <button class="product-card__add" onclick="addToCart(${p.id})" title="Agregar al carrito">
+          <button class="product-card__add" onclick="event.stopPropagation();addToCart('${p.id}')" title="Agregar al carrito">
             <i class="fa fa-plus"></i>
           </button>
         </div>
@@ -125,5 +133,16 @@ function renderProducts() {
 }
 
 // ---------- Init ----------
-renderProducts();
 updateCartBadge();
+
+// Home page featured grid: load the catalog from Firestore, then render.
+// (Other pages own their own EPC.load() call; this only runs where #productsGrid exists.)
+if (window.EPC && document.getElementById('productsGrid')) {
+  EPC.load()
+    .then(data => { products = data.products; renderProducts(); })
+    .catch(err => {
+      console.error('No se pudo cargar el catálogo desde Firebase:', err);
+      document.getElementById('productsGrid').innerHTML =
+        '<p style="padding:2rem;color:var(--clr-muted)">No se pudieron cargar los productos.</p>';
+    });
+}

@@ -1,0 +1,99 @@
+name: Deploy to S3 + CloudFront
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+# id-token: write is required for the OIDC (assume-role) auth path. It is harmless
+# for the static-keys path. contents: read is the default checkout permission.
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  STACK_NAME: elitepcparts-site
+  AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build site
+        run: npm run build
+
+      # Two auth paths — the workflow auto-selects based on whether the
+      # AWS_ROLE_ARN repo/org Variable is set:
+      #   • set   -> assume the IAM role via GitHub OIDC (keyless, recommended)
+      #   • unset -> use static AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY secrets
+      - name: Configure AWS credentials (OIDC role)
+        if: ${{ vars.AWS_ROLE_ARN != '' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          role-session-name: gha-elitepcparts-deploy
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Configure AWS credentials (access keys)
+        if: ${{ vars.AWS_ROLE_ARN == '' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Provision infrastructure (idempotent)
+        run: |
+          aws cloudformation deploy \
+            --template-file infra/cloudformation.yml \
+            --stack-name "$STACK_NAME" \
+            --capabilities CAPABILITY_IAM \
+            --no-fail-on-empty-changeset
+
+      - name: Read stack outputs
+        run: |
+          read_output() {
+            aws cloudformation describe-stacks \
+              --stack-name "$STACK_NAME" \
+              --query "Stacks[0].Outputs[?OutputKey=='$1'].OutputValue" \
+              --output text
+          }
+          echo "BUCKET=$(read_output BucketName)" >> "$GITHUB_ENV"
+          echo "DIST_ID=$(read_output DistributionId)" >> "$GITHUB_ENV"
+          echo "SITE_URL=https://$(read_output DistributionDomainName)" >> "$GITHUB_ENV"
+
+      - name: Upload static assets (long cache)
+        run: |
+          aws s3 sync ./dist "s3://$BUCKET" --delete \
+            --exclude "*.html" \
+            --cache-control "public, max-age=31536000, immutable"
+
+      - name: Upload HTML (no cache)
+        run: |
+          aws s3 sync ./dist "s3://$BUCKET" \
+            --exclude "*" --include "*.html" \
+            --content-type "text/html; charset=utf-8" \
+            --cache-control "no-cache"
+
+      - name: Invalidate CloudFront
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "$DIST_ID" \
+            --paths "/*"
+
+      - name: Summary
+        run: echo "Deployed to $SITE_URL" >> "$GITHUB_STEP_SUMMARY"

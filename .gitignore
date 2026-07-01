@@ -6,6 +6,7 @@ yarn-debug.log*
 yarn-error.log*
 firebase-debug.log*
 firebase-debug.*.log*
+credentials.json
 
 # Firebase cache
 .firebase/
@@ -46,6 +47,9 @@ build/Release
 
 # Dependency directories
 node_modules/
+
+# Build output
+dist/
 
 # Optional npm cache directory
 .npm

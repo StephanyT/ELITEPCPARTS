@@ -1,36 +1,40 @@
 // ============================================================
-// CATÁLOGO
+// CATÁLOGO — products loaded from Firestore (see src/js/data.js)
 // ============================================================
 
-const allProducts = [
-  { id: 1,  name: 'Intel Core i9-13900K',           category: 'Procesadores',   brand: 'Intel',   price: 189999, rating: 4.8, reviews: 124 },
-  { id: 2,  name: 'AMD Ryzen 7 7700X',              category: 'Procesadores',   brand: 'AMD',     price: 142000, rating: 4.7, reviews: 98  },
-  { id: 3,  name: 'AMD Ryzen 5 7600X',              category: 'Procesadores',   brand: 'AMD',     price: 98000,  rating: 4.6, reviews: 210 },
-  { id: 4,  name: 'Intel Core i5-13600K',           category: 'Procesadores',   brand: 'Intel',   price: 115000, rating: 4.7, reviews: 185 },
-  { id: 5,  name: 'NVIDIA RTX 4070 Ti 12GB',        category: 'Placas de Video',brand: 'NVIDIA',  price: 425000, rating: 4.9, reviews: 76  },
-  { id: 6,  name: 'NVIDIA RTX 4060 Ti 8GB',         category: 'Placas de Video',brand: 'NVIDIA',  price: 258000, rating: 4.7, reviews: 102 },
-  { id: 7,  name: 'AMD RX 7900 XTX 24GB',           category: 'Placas de Video',brand: 'AMD',     price: 495000, rating: 4.8, reviews: 54  },
-  { id: 8,  name: 'Corsair Vengeance 32GB DDR5',    category: 'Memorias RAM',   brand: 'Corsair', price: 68500,  rating: 4.6, reviews: 210 },
-  { id: 9,  name: 'Kingston Fury Beast 16GB DDR4',  category: 'Memorias RAM',   brand: 'Kingston',price: 28000,  rating: 4.5, reviews: 320 },
-  { id: 10, name: 'Samsung 980 Pro 1TB NVMe',       category: 'Almacenamiento', brand: 'Samsung', price: 54000,  rating: 4.8, reviews: 305 },
-  { id: 11, name: 'WD Black SN850X 2TB NVMe',       category: 'Almacenamiento', brand: 'WD',      price: 89000,  rating: 4.7, reviews: 142 },
-  { id: 12, name: 'ASUS ROG Strix B650-E',          category: 'Placas Madre',   brand: 'ASUS',    price: 135000, rating: 4.7, reviews: 55  },
-  { id: 13, name: 'MSI MAG Z790 Tomahawk',          category: 'Placas Madre',   brand: 'MSI',     price: 118000, rating: 4.6, reviews: 78  },
-  { id: 14, name: 'Corsair RM850x 850W Gold',       category: 'Fuentes',        brand: 'Corsair', price: 72000,  rating: 4.9, reviews: 180 },
-  { id: 15, name: 'Seasonic Focus GX-750W Gold',    category: 'Fuentes',        brand: 'Seasonic',price: 64000,  rating: 4.8, reviews: 95  },
-  { id: 16, name: 'be quiet! Dark Rock Pro 4',      category: 'Cooling',        brand: 'be quiet!',price:38000,  rating: 4.6, reviews: 92  },
-  { id: 17, name: 'Noctua NH-D15',                  category: 'Cooling',        brand: 'Noctua',  price: 45000,  rating: 4.9, reviews: 215 },
-  { id: 18, name: 'Logitech G502 Hero',             category: 'Periféricos',    brand: 'Logitech',price: 28500,  rating: 4.8, reviews: 430 },
-  { id: 19, name: 'Corsair K70 RGB MK.2',           category: 'Periféricos',    brand: 'Corsair', price: 52000,  rating: 4.6, reviews: 188 },
-  { id: 20, name: 'AMD Ryzen 9 7950X',              category: 'Procesadores',   brand: 'AMD',     price: 320000, rating: 4.9, reviews: 62  },
-];
-
+let allProducts = [];               // filled once EPC.load() resolves
 const ITEMS_PER_PAGE = 9;
 let currentPage = 1;
-let filtered = [...allProducts];
+let filtered = [];
+
+// Build the category + brand checkboxes from the data so they always match what
+// Firestore actually contains, and size the price slider to the real range.
+function buildFilters() {
+  const cats   = [...new Set(allProducts.map(p => p.category))].sort();
+  const brands = [...new Set(allProducts.map(p => p.brand))].sort();
+
+  const catBox = document.getElementById('catFilters');
+  if (catBox) catBox.innerHTML = cats.map(c =>
+    `<label><input type="checkbox" name="cat" value="${c}" /> ${c}</label>`).join('');
+
+  const brandBox = document.getElementById('brandFilters');
+  if (brandBox) brandBox.innerHTML = brands.map(b =>
+    `<label><input type="checkbox" name="brand" value="${b}" /> ${b}</label>`).join('');
+
+  const maxPrice = Math.max(...allProducts.map(p => p.price), 0);
+  const slider = document.getElementById('priceSlider');
+  if (slider) {
+    slider.min = 0;
+    slider.max = maxPrice;
+    slider.value = maxPrice;
+    slider.step = Math.max(1, Math.round(maxPrice / 100));
+    const sliderVal = document.getElementById('priceSliderVal');
+    if (sliderVal) sliderVal.textContent = '$' + maxPrice.toLocaleString('es-AR');
+  }
+}
 
 function getFilters() {
-  const cats = [...document.querySelectorAll('input[name="cat"]:checked')].map(c => c.value);
+  const cats   = [...document.querySelectorAll('input[name="cat"]:checked')].map(c => c.value);
   const brands = [...document.querySelectorAll('input[name="brand"]:checked')].map(b => b.value);
   const maxPrice = parseInt(document.getElementById('priceSlider').value);
   const rating = parseFloat(document.querySelector('input[name="rating"]:checked').value);
@@ -43,7 +47,7 @@ function applyFilters() {
   const sort = document.getElementById('sortSelect').value;
 
   filtered = allProducts.filter(p => {
-    if (cats.length  && !cats.includes(p.category)) return false;
+    if (cats.length   && !cats.includes(p.category)) return false;
     if (brands.length && !brands.includes(p.brand))  return false;
     if (p.price > maxPrice) return false;
     if (p.rating < rating)  return false;
@@ -62,8 +66,6 @@ function applyFilters() {
 
 function render() {
   const grid = document.getElementById('catalogGrid');
-  const isListView = grid.classList.contains('list-view');
-
   const start = (currentPage - 1) * ITEMS_PER_PAGE;
   const page  = filtered.slice(start, start + ITEMS_PER_PAGE);
 
@@ -76,10 +78,8 @@ function render() {
   }
 
   grid.innerHTML = page.map(p => `
-    <article class="product-card" onclick="window.location='producto.html'">
-      <div class="img-placeholder product-card__img">
-        <i class="fa fa-box-open"></i>
-      </div>
+    <article class="product-card" onclick="window.location='producto.html?id=${p.id}'">
+      ${productImg(p)}
       <div class="product-card__body">
         <span class="product-card__cat">${p.category}</span>
         <p class="product-card__name">${p.name}</p>
@@ -89,7 +89,7 @@ function render() {
         </div>
         <div class="product-card__footer">
           <span class="product-card__price">$${p.price.toLocaleString('es-AR')}</span>
-          <button class="product-card__add" onclick="event.stopPropagation();addToCart(${p.id})">
+          <button class="product-card__add" onclick="event.stopPropagation();addToCart('${p.id}')">
             <i class="fa fa-plus"></i>
           </button>
         </div>
@@ -122,7 +122,7 @@ function renderPagination() {
   });
 }
 
-// Price slider
+// Price slider live label
 const slider = document.getElementById('priceSlider');
 const sliderVal = document.getElementById('priceSliderVal');
 slider?.addEventListener('input', () => {
@@ -135,8 +135,7 @@ document.getElementById('clearFilters')?.addEventListener('click', () => {
   document.querySelectorAll('input[name="cat"]').forEach(c => c.checked = false);
   document.querySelectorAll('input[name="brand"]').forEach(b => b.checked = false);
   document.querySelector('input[name="rating"][value="0"]').checked = true;
-  slider.value = 500000;
-  sliderVal.textContent = '$500.000';
+  if (slider) { slider.value = slider.max; sliderVal.textContent = '$' + parseInt(slider.max).toLocaleString('es-AR'); }
   document.getElementById('searchInput').value = '';
   applyFilters();
 });
@@ -154,16 +153,30 @@ document.getElementById('listView')?.addEventListener('click', () => {
   document.getElementById('gridView').classList.remove('active');
 });
 
-// Pre-filtrar por parámetros de URL (?cat=, ?q=)
-const urlParams = new URLSearchParams(window.location.search);
-const urlCat = urlParams.get('cat');
-const urlQ   = urlParams.get('q');
-if (urlCat) {
-  document.querySelectorAll('input[name="cat"]').forEach(cb => { cb.checked = cb.value === urlCat; });
-}
-if (urlQ) {
-  const si = document.getElementById('searchInput');
-  if (si) si.value = urlQ;
-}
+// ---------- Init: load catalog from Firestore, then wire filters ----------
+EPC.load()
+  .then(data => {
+    allProducts = data.products;
+    products = allProducts;            // share with main.js addToCart()
+    filtered = [...allProducts];
+    buildFilters();
 
-applyFilters();
+    // Pre-filter from URL params (?cat=, ?q=) now that checkboxes exist.
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlCat = urlParams.get('cat');
+    const urlQ   = urlParams.get('q');
+    if (urlCat) {
+      document.querySelectorAll('input[name="cat"]').forEach(cb => { cb.checked = cb.value === urlCat; });
+    }
+    if (urlQ) {
+      const si = document.getElementById('searchInput');
+      if (si) si.value = urlQ;
+    }
+
+    applyFilters();
+  })
+  .catch(err => {
+    console.error('No se pudo cargar el catálogo desde Firebase:', err);
+    const grid = document.getElementById('catalogGrid');
+    if (grid) grid.innerHTML = '<p style="color:var(--clr-muted);padding:2rem">No se pudieron cargar los productos.</p>';
+  });

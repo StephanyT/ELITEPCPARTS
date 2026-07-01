@@ -1,0 +1,127 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  ELITEPCPARTS static site hosting: private S3 bucket served through CloudFront
+  using Origin Access Control (OAC). The bucket is never public.
+
+Resources:
+  SiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      # Pinned so the deploy IAM policy (infra/iam/deploy-permissions-policy.json)
+      # can scope to this exact bucket. Globally unique via account id + suffix.
+      BucketName: elite-pc-parts-461839758888-us-east-2-an
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  OriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub "${AWS::StackName}-oac"
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  # Security response headers. The Content-Security-Policy is what makes the
+  # browser allow the Firebase SDK's direct calls (Firestore/Auth) and the
+  # product images served from the S3 image bucket. Without a CSP the browser
+  # already permits these; this policy hardens the site while keeping Firebase
+  # working by explicitly whitelisting the Google/Firebase endpoints.
+  ResponseHeadersPolicy:
+    Type: AWS::CloudFront::ResponseHeadersPolicy
+    Properties:
+      ResponseHeadersPolicyConfig:
+        Name: !Sub "${AWS::StackName}-security-headers"
+        Comment: CSP allowing Firebase (Firestore/Auth) + the product-images S3 bucket
+        SecurityHeadersConfig:
+          ContentTypeOptions:
+            Override: true
+          FrameOptions:
+            FrameOption: SAMEORIGIN
+            Override: true
+          ReferrerPolicy:
+            ReferrerPolicy: strict-origin-when-cross-origin
+            Override: true
+          StrictTransportSecurity:
+            AccessControlMaxAgeSec: 31536000
+            IncludeSubdomains: true
+            Preload: true
+            Override: true
+          ContentSecurityPolicy:
+            Override: true
+            ContentSecurityPolicy: >-
+              default-src 'self';
+              script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com;
+              style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
+              font-src 'self' data: https://cdnjs.cloudflare.com;
+              img-src 'self' data: https://product-images-461839758888-us-east-2-an.s3.us-east-2.amazonaws.com https://*.googleapis.com https://*.gstatic.com https://lh3.googleusercontent.com;
+              connect-src 'self' https://*.googleapis.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com;
+              frame-src https://elitepcparts-5d89d.firebaseapp.com https://apis.google.com https://accounts.google.com;
+              base-uri 'self';
+              object-src 'none'
+
+  Distribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        DefaultRootObject: index.html
+        PriceClass: PriceClass_100
+        HttpVersion: http2and3
+        Origins:
+          - Id: s3-origin
+            DomainName: !GetAtt SiteBucket.RegionalDomainName
+            OriginAccessControlId: !GetAtt OriginAccessControl.Id
+            S3OriginConfig:
+              OriginAccessIdentity: ""
+        DefaultCacheBehavior:
+          TargetOriginId: s3-origin
+          ViewerProtocolPolicy: redirect-to-https
+          Compress: true
+          # AWS managed "CachingOptimized" policy.
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+          ResponseHeadersPolicyId: !Ref ResponseHeadersPolicy
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponseCode: 404
+            ResponsePagePath: /src/pages/404.html
+            ErrorCachingMinTTL: 10
+          - ErrorCode: 404
+            ResponseCode: 404
+            ResponsePagePath: /src/pages/404.html
+            ErrorCachingMinTTL: 10
+
+  BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref SiteBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowCloudFrontRead
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub "${SiteBucket.Arn}/*"
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution.Id}"
+
+Outputs:
+  BucketName:
+    Description: S3 bucket the site is synced to
+    Value: !Ref SiteBucket
+  DistributionId:
+    Description: CloudFront distribution ID (for cache invalidation)
+    Value: !Ref Distribution
+  DistributionDomainName:
+    Description: Public HTTPS URL of the site
+    Value: !GetAtt Distribution.DomainName

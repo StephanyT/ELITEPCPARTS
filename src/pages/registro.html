@@ -4,19 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Crear cuenta — Elite PC Parts</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/auth.css" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/auth.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 <body>
 
   <header class="header">
     <div class="header__inner container">
-      <a href="index.html" class="header__logo">
+      <a href="../../index.html" class="header__logo">
         <span class="logo-elite">ELITE</span><span class="logo-pc"> PC PARTS</span>
       </a>
       <nav class="header__nav">
-        <a href="index.html">Inicio</a>
+        <a href="../../index.html">Inicio</a>
         <a href="catalogo.html">Productos</a>
         <a href="servicios.html">Servicios</a>
         <a href="pcbuilder.html">PC Builder</a>
@@ -35,7 +35,7 @@
       <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
     </div>
     <nav class="mobile-nav" id="mobileNav">
-      <a href="index.html">Inicio</a>
+      <a href="../../index.html">Inicio</a>
       <a href="catalogo.html">Productos</a>
       <a href="servicios.html">Servicios</a>
       <a href="pcbuilder.html">PC Builder</a>
@@ -143,12 +143,9 @@
 
     </div>
   </main>
-  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-init.js"></script>
-  <script src="js/main.js"></script>
-  <script src="js/auth.js"></script>
+  <script src="../js/firebase-init.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/auth.js"></script>
   <script>
     // Password strength
     document.getElementById('password').addEventListener('input', function() {
@@ -216,7 +213,7 @@
               createdAt: new Date().toLocaleDateString('es-PE'),
             }))
             .then(() => {
-              loginSuccess({ id: user.uid, firstName, lastName, email, phone }, false);
+              loginSuccess({ id: user.uid, firstName, lastName, email, phone });
             });
         })
         .catch((err) => {
@@ -231,7 +228,30 @@
     });
 
     function socialLogin(provider) {
-      showAlert(`Login con ${provider} no disponible en la demo.`, 'info');
+      if (provider !== 'Google') {
+        showAlert(`Registro con ${provider} no está configurado.`, 'info');
+        return;
+      }
+      const gp = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(gp)
+        .then((cred) => {
+          const u = cred.user;
+          const firstName = u.displayName?.split(' ')[0] || '';
+          const lastName  = u.displayName?.split(' ').slice(1).join(' ') || '';
+          return db.collection('usuarios').doc(u.uid)
+            .set({ firstName, lastName, email: u.email, phone: u.phoneNumber || '' }, { merge: true })
+            .then(() => loginSuccess({ id: u.uid, firstName, lastName, email: u.email }));
+        })
+        .catch((err) => {
+          if (err.code === 'auth/popup-closed-by-user') return;
+          if (err.code === 'auth/unauthorized-domain') {
+            showAlert('Este dominio aún no está autorizado para Google. Registrate con email y contraseña (funciona en cualquier despliegue), o pedí al administrador que agregue este dominio en Firebase → Authentication → Authorized domains.', 'info');
+          } else if (err.code === 'auth/operation-not-allowed') {
+            showAlert('El registro con Google no está habilitado en este proyecto. Usá email y contraseña.', 'info');
+          } else {
+            showAlert('No se pudo continuar con Google.', 'error');
+          }
+        });
     }
   </script>
 </body>

@@ -4,19 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Catálogo — Elite PC Parts</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/catalogo.css" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/catalogo.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 <body>
 
   <header class="header">
     <div class="header__inner container">
-      <a href="index.html" class="header__logo">
+      <a href="../../index.html" class="header__logo">
         <span class="logo-elite">ELITE</span><span class="logo-pc"> PC PARTS</span>
       </a>
       <nav class="header__nav">
-        <a href="index.html">Inicio</a>
+        <a href="../../index.html">Inicio</a>
         <a href="catalogo.html" class="active">Productos</a>
         <a href="servicios.html">Servicios</a>
         <a href="pcbuilder.html">PC Builder</a>
@@ -36,7 +36,7 @@
       <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
     </div>
     <nav class="mobile-nav" id="mobileNav">
-      <a href="index.html">Inicio</a>
+      <a href="../../index.html">Inicio</a>
       <a href="catalogo.html">Productos</a>
       <a href="servicios.html">Servicios</a>
       <a href="pcbuilder.html">PC Builder</a>
@@ -56,25 +56,14 @@
 
         <div class="filter-group">
           <h4>Categoría</h4>
-          <label><input type="checkbox" name="cat" value="Procesadores" checked /> Procesadores</label>
-          <label><input type="checkbox" name="cat" value="Placas de Video" /> Placas de Video</label>
-          <label><input type="checkbox" name="cat" value="Memorias RAM" /> Memorias RAM</label>
-          <label><input type="checkbox" name="cat" value="Almacenamiento" /> Almacenamiento</label>
-          <label><input type="checkbox" name="cat" value="Placas Madre" /> Placas Madre</label>
-          <label><input type="checkbox" name="cat" value="Fuentes" /> Fuentes</label>
-          <label><input type="checkbox" name="cat" value="Cooling" /> Cooling</label>
-          <label><input type="checkbox" name="cat" value="Periféricos" /> Periféricos</label>
+          <!-- Populated from Firestore by catalogo.js -->
+          <div class="filter-options" id="catFilters"></div>
         </div>
 
         <div class="filter-group">
           <h4>Marca</h4>
-          <label><input type="checkbox" name="brand" value="Intel" /> Intel</label>
-          <label><input type="checkbox" name="brand" value="AMD" /> AMD</label>
-          <label><input type="checkbox" name="brand" value="NVIDIA" /> NVIDIA</label>
-          <label><input type="checkbox" name="brand" value="Corsair" /> Corsair</label>
-          <label><input type="checkbox" name="brand" value="Samsung" /> Samsung</label>
-          <label><input type="checkbox" name="brand" value="ASUS" /> ASUS</label>
-          <label><input type="checkbox" name="brand" value="MSI" /> MSI</label>
+          <!-- Populated from Firestore by catalogo.js -->
+          <div class="filter-options" id="brandFilters"></div>
         </div>
 
         <div class="filter-group">
@@ -148,12 +137,10 @@
     </div>
     <div class="footer__bottom"><p>&copy; 2024 Elite PC Parts. Todos los derechos reservados.</p></div>
   </footer>
-  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
-  <script src="js/firebase-init.js"></script>
-  <script src="js/main.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/catalogo.js"></script>
+  <script src="../js/firebase-init.js"></script>
+  <script src="../js/data.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/catalogo.js"></script>
 </body>
 </html>

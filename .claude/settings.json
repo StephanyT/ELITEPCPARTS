@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -v '^\\\\.git$')",
+      "Bash(grep -vE '^\\\\.{1,2}$')",
+      "WebSearch",
+      "WebFetch(domain:www.newegg.com)",
+      "Bash(ls *.rules *.json)",
+      "Bash(cat firestore.rules)",
+      "Bash(node scripts/transform-components.mjs)",
+      "Bash(node -e ' *)",
+      "Bash(node -e \"const d=require\\('./components-with-ids.json'\\);console.log\\(d[1].options[0].image\\);console.log\\(d[0].options[0].image\\);console.log\\(d[6].options[4].image\\);\")"
+    ]
+  }
+}

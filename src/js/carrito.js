@@ -21,7 +21,7 @@ function renderCart() {
 
   itemsEl.innerHTML = cart.map(item => `
     <div class="cart-item" data-id="${item.id}">
-      <div class="img-placeholder cart-item__img"><i class="fa fa-box-open"></i></div>
+      ${productImg(item, 'cart-item__img')}
       <div class="cart-item__info">
         <span class="cart-item__cat">${item.category || 'Componente'}</span>
         <p class="cart-item__name">${item.name}</p>
@@ -29,12 +29,12 @@ function renderCart() {
       </div>
       <div class="cart-item__controls">
         <div class="qty-control">
-          <button onclick="changeQty(${item.id}, -1)"><i class="fa fa-minus"></i></button>
+          <button onclick="changeQty('${item.id}', -1)"><i class="fa fa-minus"></i></button>
           <span>${item.qty}</span>
-          <button onclick="changeQty(${item.id}, 1)"><i class="fa fa-plus"></i></button>
+          <button onclick="changeQty('${item.id}', 1)"><i class="fa fa-plus"></i></button>
         </div>
         <span class="cart-item__subtotal">$${(item.price * item.qty).toLocaleString('es-AR')}</span>
-        <button class="cart-item__remove" onclick="removeItem(${item.id})" title="Eliminar">
+        <button class="cart-item__remove" onclick="removeItem('${item.id}')" title="Eliminar">
           <i class="fa fa-trash"></i>
         </button>
       </div>
@@ -88,29 +88,69 @@ document.getElementById('applyCoupon')?.addEventListener('click', () => {
   }
 });
 
+// Checkout: requires login, then records the order in Firestore and clears the cart.
 document.getElementById('checkoutBtn')?.addEventListener('click', () => {
   if (!cart.length) return;
-  showToast('¡Redirigiendo al checkout! (demo)');
+  if (!window.EPCAuth || !EPCAuth.uid) {
+    showToast('Iniciá sesión para finalizar tu compra');
+    setTimeout(() => { location.href = 'login.html?redirect=carrito.html'; }, 1000);
+    return;
+  }
+  placeOrder();
 });
 
-// Productos sugeridos
-const suggested = products.slice(0, 4);
-const sugGrid = document.getElementById('suggestedGrid');
-if (sugGrid) {
-  sugGrid.innerHTML = suggested.map(p => `
-    <article class="product-card">
-      <div class="img-placeholder product-card__img"><i class="fa fa-box-open"></i></div>
-      <div class="product-card__body">
-        <span class="product-card__cat">${p.category}</span>
-        <p class="product-card__name">${p.name}</p>
-        <div class="product-card__stars">${starsHTML(p.rating)} <span>(${p.reviews})</span></div>
-        <div class="product-card__footer">
-          <span class="product-card__price">$${p.price.toLocaleString('es-AR')}</span>
-          <button class="product-card__add" onclick="addToCart(${p.id})"><i class="fa fa-plus"></i></button>
-        </div>
-      </div>
-    </article>
-  `).join('');
+async function placeOrder() {
+  const subtotal    = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const discountAmt = Math.round(subtotal * discount);
+  const shipping    = subtotal >= 50000 ? 0 : 4500;
+  const total       = subtotal - discountAmt + shipping;
+
+  const order = {
+    id:      '#' + String(Date.now()).slice(-6),
+    date:    new Date().toLocaleDateString('es-AR'),
+    items:   cart.map(i => ({ id: i.id, name: i.name, qty: i.qty, price: i.price })),
+    summary: cart.map(i => `${i.qty}x ${i.name}`).join(', '),
+    total,
+    status:  'Procesando',
+  };
+
+  try {
+    await db.collection('usuarios').doc(EPCAuth.uid).set({
+      pedidos: firebase.firestore.FieldValue.arrayUnion(order),
+      cart: [],
+    }, { merge: true });
+    cart = [];
+    saveCart();
+    renderCart();
+    showToast('¡Compra realizada! Pedido ' + order.id);
+  } catch (e) {
+    console.error('checkout', e);
+    showToast('No se pudo completar la compra. Intentá de nuevo.');
+  }
 }
 
+// Productos sugeridos (cargados desde Firestore)
+function renderSuggested() {
+  const sugGrid = document.getElementById('suggestedGrid');
+  if (!sugGrid || !window.EPC) return;
+  EPC.load().then(data => {
+    products = data.products;
+    sugGrid.innerHTML = data.products.slice(0, 4).map(p => `
+      <article class="product-card" onclick="window.location='producto.html?id=${p.id}'">
+        ${productImg(p)}
+        <div class="product-card__body">
+          <span class="product-card__cat">${p.category}</span>
+          <p class="product-card__name">${p.name}</p>
+          <div class="product-card__stars">${starsHTML(p.rating)} <span>(${p.reviews})</span></div>
+          <div class="product-card__footer">
+            <span class="product-card__price">$${p.price.toLocaleString('es-AR')}</span>
+            <button class="product-card__add" onclick="event.stopPropagation();addToCart('${p.id}')"><i class="fa fa-plus"></i></button>
+          </div>
+        </div>
+      </article>
+    `).join('');
+  }).catch(() => {});
+}
+
+renderSuggested();
 renderCart();
