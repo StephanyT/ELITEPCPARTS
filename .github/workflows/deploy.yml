@@ -40,6 +40,16 @@ jobs:
       - name: Build site
         run: npm run build
 
+      # The runner's bundled AWS CLI can lag behind new S3 features (e.g. the
+      # account-regional namespace bucket type, which needs the x-amz-bucket-namespace
+      # header). Install the latest v2 so bucket detection/creation works.
+      - name: Update AWS CLI to latest v2
+        run: |
+          curl -sSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscliv2.zip
+          unzip -q awscliv2.zip
+          sudo ./aws/install --update
+          aws --version
+
       # Two auth paths — the workflow auto-selects based on whether the
       # AWS_ROLE_ARN repo/org Variable is set:
       #   • set   -> assume the IAM role via GitHub OIDC (keyless, recommended)
