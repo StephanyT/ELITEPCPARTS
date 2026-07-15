@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carrito — Elite PC Parts</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/carrito.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+  <header class="header">
+    <div class="header__inner container">
+      <a href="../../index.html" class="header__logo"><span class="logo-elite">ELITE</span><span class="logo-pc"> PC PARTS</span></a>
+      <nav class="header__nav">
+        <a href="../../index.html">Inicio</a>
+        <a href="catalogo.html">Productos</a>
+        <a href="servicios.html">Servicios</a>
+        <a href="pcbuilder.html">PC Builder</a>
+        <a href="contacto.html">Contacto</a>
+      </nav>
+      <div class="header__actions">
+        <div class="search-bar">
+          <input type="text" placeholder="Buscar productos..." />
+          <button><i class="fa fa-search"></i></button>
+        </div>
+        <a href="cuenta.html" class="icon-btn"><i class="fa fa-user"></i></a>
+        <a href="carrito.html" class="icon-btn cart-btn"><i class="fa fa-shopping-cart"></i><span class="cart-badge">0</span></a>
+      </div>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+    <nav class="mobile-nav" id="mobileNav">
+      <a href="../../index.html">Inicio</a><a href="catalogo.html">Productos</a>
+      <a href="servicios.html">Servicios</a><a href="pcbuilder.html">PC Builder</a><a href="contacto.html">Contacto</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="cart-page container">
+
+      <div class="cart-header">
+        <h1><i class="fa fa-shopping-cart"></i> Carrito de compras</h1>
+        <div class="cart-header__actions">
+          <button id="clearCartBtn" class="link-more cart-clear" style="display:none"><i class="fa fa-trash"></i> Vaciar carrito</button>
+          <a href="catalogo.html" class="link-more"><i class="fa fa-arrow-left"></i> Seguir comprando</a>
+        </div>
+      </div>
+
+      <!-- Items -->
+      <div class="cart-layout">
+        <div class="cart-items" id="cartItems">
+          <!-- generado por JS -->
+        </div>
+
+        <!-- Resumen de compra -->
+        <aside class="cart-summary">
+          <h3>Resumen de compra</h3>
+
+          <div class="summary-rows" id="summaryRows">
+            <!-- generado por JS -->
+          </div>
+
+          <div class="summary-divider"></div>
+
+          <div class="summary-discount">
+            <label>Código de descuento</label>
+            <div class="coupon-row">
+              <input type="text" id="couponInput" placeholder="Ingresá tu código" />
+              <button id="applyCoupon" class="btn btn--outline">Aplicar</button>
+            </div>
+            <p class="coupon-msg" id="couponMsg"></p>
+          </div>
+
+          <div class="summary-divider"></div>
+
+          <div class="summary-total-row">
+            <span>Total</span>
+            <strong id="cartTotal">$0</strong>
+          </div>
+
+          <div class="shipping-note"><i class="fa fa-truck"></i> Envío gratis en compras mayores a $50.000</div>
+
+          <button class="btn btn--primary" style="width:100%" id="checkoutBtn">
+            <i class="fa fa-lock"></i> Finalizar compra
+          </button>
+
+          <div class="payment-methods">
+            <i class="fab fa-cc-visa"></i>
+            <i class="fab fa-cc-mastercard"></i>
+            <i class="fab fa-cc-amex"></i>
+            <i class="fa fa-money-bill-wave"></i>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Carrito vacío -->
+      <div class="cart-empty" id="cartEmpty" style="display:none">
+        <i class="fa fa-shopping-cart"></i>
+        <h2>Tu carrito está vacío</h2>
+        <p>Explorá nuestro catálogo y encontrá los mejores componentes.</p>
+        <a href="catalogo.html" class="btn btn--primary">Ver productos</a>
+      </div>
+
+      <!-- Productos sugeridos -->
+      <div class="suggested-section">
+        <h2 class="section-title">También te puede interesar</h2>
+        <div class="products__grid" id="suggestedGrid"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner container">
+      <div class="footer__brand">
+        <p class="footer__logo"><span class="logo-elite">ELITE</span><span class="logo-pc"> PC PARTS</span></p>
+        <p>Tu tienda de confianza para armar la PC de tus sueños.</p>
+      </div>
+      <div class="footer__links"><h4>Productos</h4><a href="catalogo.html">Ver catálogo</a></div>
+      <div class="footer__links"><h4>Servicios</h4><a href="servicios.html">Servicio técnico</a></div>
+      <div class="footer__links"><h4>Contacto</h4><a href="contacto.html">Contactanos</a></div>
+    </div>
+    <div class="footer__bottom"><p>&copy; 2024 Elite PC Parts. Todos los derechos reservados.</p></div>
+  </footer>
+  <script src="../js/firebase-init.js"></script>
+  <script src="../js/data.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/carrito.js"></script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PC Builder — Elite PC Parts</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/pcbuilder.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+  <header class="header">
+    <div class="header__inner container">
+      <a href="../../index.html" class="header__logo"><span class="logo-elite">ELITE</span><span class="logo-pc"> PC PARTS</span></a>
+      <nav class="header__nav">
+        <a href="../../index.html">Inicio</a>
+        <a href="catalogo.html">Productos</a>
+        <a href="servicios.html">Servicios</a>
+        <a href="pcbuilder.html" class="active">PC Builder</a>
+        <a href="contacto.html">Contacto</a>
+      </nav>
+      <div class="header__actions">
+        <div class="search-bar">
+          <input type="text" placeholder="Buscar productos..." />
+          <button><i class="fa fa-search"></i></button>
+        </div>
+        <a href="cuenta.html" class="icon-btn"><i class="fa fa-user"></i></a>
+        <a href="carrito.html" class="icon-btn cart-btn"><i class="fa fa-shopping-cart"></i><span class="cart-badge">0</span></a>
+      </div>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+    <nav class="mobile-nav" id="mobileNav">
+      <a href="../../index.html">Inicio</a><a href="catalogo.html">Productos</a>
+      <a href="servicios.html">Servicios</a><a href="pcbuilder.html">PC Builder</a><a href="contacto.html">Contacto</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="builder-hero">
+      <div class="container">
+        <h1><i class="fa fa-tools"></i> PC Builder Inteligente</h1>
+        <p>Armá tu PC ideal. Verificamos compatibilidad en tiempo real.</p>
+      </div>
+    </section>
+
+    <div class="builder-page container">
+
+      <!-- STEPS -->
+      <div class="builder-steps">
+        <div class="step-item active" data-step="0">
+          <div class="step-num">1</div><span>Procesador</span>
+        </div>
+        <div class="step-divider"></div>
+        <div class="step-item" data-step="1">
+          <div class="step-num">2</div><span>Placa Madre</span>
+        </div>
+        <div class="step-divider"></div>
+        <div class="step-item" data-step="2">
+          <div class="step-num">3</div><span>Memoria RAM</span>
+        </div>
+        <div class="step-divider"></div>
+        <div class="step-item" data-step="3">
+          <div class="step-num">4</div><span>Almacenamiento</span>
+        </div>
+        <div class="step-divider"></div>
+        <div class="step-item" data-step="4">
+          <div class="step-num">5</div><span>Placa de Video</span>
+        </div>
+        <div class="step-divider"></div>
+        <div class="step-item" data-step="5">
+          <div class="step-num">6</div><span>Fuente</span>
+        </div>
+        <div class="step-divider"></div>
+        <div class="step-item" data-step="6">
+          <div class="step-num">7</div><span>Gabinete</span>
+        </div>
+      </div>
+
+      <div class="builder-content">
+        <!-- SELECTOR COMPONENTES -->
+        <div class="builder-selector">
+          <div class="selector-header">
+            <h2 id="stepTitle">Seleccioná un Procesador</h2>
+            <p id="stepDesc" class="selector-desc">El procesador es el cerebro de tu PC. Elegí según tu uso: gaming, edición o trabajo.</p>
+          </div>
+
+          <div class="selector-search">
+            <input type="text" id="builderSearch" placeholder="Buscar componente..." />
+            <select id="builderSort">
+              <option value="default">Ordenar</option>
+              <option value="price-asc">Precio ↑</option>
+              <option value="price-desc">Precio ↓</option>
+            </select>
+          </div>
+
+          <div class="components-list" id="componentsList"></div>
+
+          <div class="selector-nav">
+            <button class="btn btn--outline" id="prevStep" disabled>
+              <i class="fa fa-arrow-left"></i> Anterior
+            </button>
+            <button class="btn btn--primary" id="nextStep">
+              Siguiente <i class="fa fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- RESUMEN BUILD -->
+        <aside class="builder-summary">
+          <h3><i class="fa fa-list-alt"></i> Tu Build</h3>
+
+          <div class="summary-list" id="summaryList">
+            <p class="summary-empty">Aún no seleccionaste componentes</p>
+          </div>
+
+          <div class="summary-total">
+            <div class="total-row">
+              <span>Subtotal</span>
+              <strong id="buildTotal">$0</strong>
+            </div>
+            <div class="compatibility-status" id="compatStatus">
+              <i class="fa fa-check-circle"></i> Todos los componentes son compatibles
+            </div>
+          </div>
+
+          <button class="btn btn--primary" style="width:100%" id="addBuildToCart" disabled>
+            <i class="fa fa-cart-plus"></i> Agregar todo al carrito
+          </button>
+          <button class="btn btn--outline" style="width:100%;margin-top:.5rem" id="resetBuild">
+            <i class="fa fa-redo"></i> Reiniciar build
+          </button>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner container">
+      <div class="footer__brand">
+        <p class="footer__logo"><span class="logo-elite">ELITE</span><span class="logo-pc"> PC PARTS</span></p>
+        <p>Tu tienda de confianza para armar la PC de tus sueños.</p>
+      </div>
+      <div class="footer__links"><h4>Productos</h4><a href="catalogo.html">Ver catálogo</a></div>
+      <div class="footer__links"><h4>Servicios</h4><a href="servicios.html">Servicio técnico</a></div>
+      <div class="footer__links"><h4>Contacto</h4><a href="contacto.html">Contactanos</a></div>
+    </div>
+    <div class="footer__bottom"><p>&copy; 2024 Elite PC Parts. Todos los derechos reservados.</p></div>
+  </footer>
+  <script src="../js/firebase-init.js"></script>
+  <script src="../js/data.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/pcbuilder.js"></script>
+</body>
+</html>

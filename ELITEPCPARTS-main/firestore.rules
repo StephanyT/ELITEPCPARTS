@@ -1,0 +1,19 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Product catalog: readable by anyone (the storefront is public), but never
+    // writable from the client. Seeding/edits happen via the Admin SDK
+    // (scripts/import-components.mjs), which bypasses these rules.
+    match /components/{doc} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // A user's own profile document — holds their profile fields plus their
+    // persisted `cart` array and `pedidos` (orders). The recursive wildcard also
+    // covers any future subcollections under the user.
+    match /usuarios/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
