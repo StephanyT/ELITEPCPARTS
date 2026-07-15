@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Delete, Param, Body } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { Cart } from './cart.entity';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiBody } from '@nestjs/swagger';
 
 @ApiTags('cart')
 @Controller('cart')
@@ -19,6 +19,7 @@ export class CartController {
   }
 
   @Post()
+  @ApiBody({ schema: { example: { cantidad: 2 } } })
   create(@Body() data: Partial<Cart>) {
     return this.cartService.create(data);
   }

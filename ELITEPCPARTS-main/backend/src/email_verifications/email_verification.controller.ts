@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Delete, Param, Body } from '@nestjs/common';
 import { EmailVerificationsService } from './email_verification.service';
 import { EmailVerification } from './email-verification.entity';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiBody } from '@nestjs/swagger';
 
 @ApiTags('email_verifications')
 @Controller('email_verifications')
@@ -19,6 +19,7 @@ export class EmailVerificationsController {
   }
 
   @Post()
+  @ApiBody({ schema: { example: { token: 'abc123', usado: false } } })
   create(@Body() data: Partial<EmailVerification>) {
     return this.emailVerificationsService.create(data);
   }
