@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contacto — Elite PC Parts</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/contacto.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+  <header class="header">
+    <div class="header__inner container">
+      <a href="../../index.html" class="header__logo"><span class="logo-elite">ELITE</span><span class="logo-pc"> PC PARTS</span></a>
+      <nav class="header__nav">
+        <a href="../../index.html">Inicio</a>
+        <a href="catalogo.html">Productos</a>
+        <a href="servicios.html">Servicios</a>
+        <a href="pcbuilder.html">PC Builder</a>
+        <a href="contacto.html" class="active">Contacto</a>
+      </nav>
+      <div class="header__actions">
+        <div class="search-bar">
+          <input type="text" placeholder="Buscar productos..." />
+          <button><i class="fa fa-search"></i></button>
+        </div>
+        <a href="cuenta.html" class="icon-btn"><i class="fa fa-user"></i></a>
+        <a href="carrito.html" class="icon-btn cart-btn"><i class="fa fa-shopping-cart"></i><span class="cart-badge">0</span></a>
+      </div>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+    <nav class="mobile-nav" id="mobileNav">
+      <a href="../../index.html">Inicio</a><a href="catalogo.html">Productos</a>
+      <a href="servicios.html">Servicios</a><a href="pcbuilder.html">PC Builder</a><a href="contacto.html">Contacto</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="contact-hero">
+      <div class="container">
+        <h1>Contáctanos</h1>
+        <p>¿Tenés alguna pregunta? Estamos para ayudarte. Respondemos en menos de 24 horas.</p>
+      </div>
+    </section>
+
+    <section class="contact-section section">
+      <div class="container">
+        <div class="contact-layout">
+
+          <!-- FORMULARIO -->
+          <div class="contact-form-wrap">
+            <h2>Envianos un mensaje</h2>
+            <form class="contact-form" id="contactForm" novalidate>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="firstName">Nombre <span class="req">*</span></label>
+                  <input type="text" id="firstName" placeholder="Tu nombre" required />
+                  <span class="field-error" id="err-firstName"></span>
+                </div>
+                <div class="form-group">
+                  <label for="lastName">Apellido <span class="req">*</span></label>
+                  <input type="text" id="lastName" placeholder="Tu apellido" required />
+                  <span class="field-error" id="err-lastName"></span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="email">Email <span class="req">*</span></label>
+                <input type="email" id="email" placeholder="tu@email.com" required />
+                <span class="field-error" id="err-email"></span>
+              </div>
+              <div class="form-group">
+                <label for="phone">Teléfono</label>
+                <input type="tel" id="phone" placeholder="+54 11 xxxx-xxxx" />
+              </div>
+              <div class="form-group">
+                <label for="subject">Asunto <span class="req">*</span></label>
+                <select id="subject" required>
+                  <option value="">Seleccioná un asunto</option>
+                  <option value="consulta">Consulta de producto</option>
+                  <option value="tecnico">Servicio técnico</option>
+                  <option value="pedido">Estado de pedido</option>
+                  <option value="garantia">Garantía / devolución</option>
+                  <option value="otro">Otro</option>
+                </select>
+                <span class="field-error" id="err-subject"></span>
+              </div>
+              <div class="form-group">
+                <label for="message">Mensaje <span class="req">*</span></label>
+                <textarea id="message" rows="5" placeholder="Escribí tu consulta..." required></textarea>
+                <span class="field-error" id="err-message"></span>
+              </div>
+              <button type="submit" class="btn btn--primary" id="submitBtn">
+                <i class="fa fa-paper-plane"></i> Enviar mensaje
+              </button>
+              <div class="form-success" id="formSuccess" style="display:none">
+                <i class="fa fa-check-circle"></i>
+                <p>¡Mensaje enviado! Te contactaremos a la brevedad.</p>
+              </div>
+            </form>
+          </div>
+
+          <!-- INFO DE CONTACTO -->
+          <aside class="contact-info">
+            <h2>Información de contacto</h2>
+
+            <div class="contact-info__item">
+              <div class="contact-info__icon"><i class="fa fa-map-marker-alt"></i></div>
+              <div>
+                <strong>Dirección</strong>
+                <p>Av. Corrientes 1234, Piso 2<br />CABA, Buenos Aires, Argentina</p>
+              </div>
+            </div>
+
+            <div class="contact-info__item">
+              <div class="contact-info__icon"><i class="fa fa-phone"></i></div>
+              <div>
+                <strong>Teléfono</strong>
+                <p>+54 11 1234-5678</p>
+              </div>
+            </div>
+
+            <div class="contact-info__item">
+              <div class="contact-info__icon"><i class="fa fa-envelope"></i></div>
+              <div>
+                <strong>Email</strong>
+                <p>contacto@elitepcparts.com</p>
+              </div>
+            </div>
+
+            <div class="contact-info__item">
+              <div class="contact-info__icon"><i class="fa fa-clock"></i></div>
+              <div>
+                <strong>Horarios de atención</strong>
+                <p>Lun — Vie: 9:00 a 19:00 hs<br />Sáb: 9:00 a 14:00 hs</p>
+              </div>
+            </div>
+
+            <div class="contact-social">
+              <p>Seguinos en redes</p>
+              <div class="footer__social">
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-youtube"></i></a>
+              </div>
+            </div>
+
+            <!-- Mapa placeholder -->
+            <div class="map-placeholder">
+              <i class="fa fa-map"></i>
+              <p>Av. Corrientes 1234, CABA</p>
+            </div>
+          </aside>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq section">
+      <div class="container">
+        <h2 class="section-title text-center">Preguntas frecuentes</h2>
+        <div class="faq-list" id="faqList">
+          <div class="faq-item">
+            <button class="faq-q">¿Cuánto demora el envío? <i class="fa fa-chevron-down"></i></button>
+            <div class="faq-a"><p>Los envíos dentro de CABA demoran 24-48 hs. Al interior del país, entre 3 y 7 días hábiles según la zona.</p></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-q">¿Tienen garantía los productos? <i class="fa fa-chevron-down"></i></button>
+            <div class="faq-a"><p>Sí. Todos los productos tienen garantía oficial del fabricante, que varía entre 1 y 3 años según el producto.</p></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-q">¿Puedo devolver un producto? <i class="fa fa-chevron-down"></i></button>
+            <div class="faq-a"><p>Tenés 30 días para solicitar cambio o devolución siempre que el producto esté en su empaque original y sin uso.</p></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-q">¿Aceptan transferencia bancaria? <i class="fa fa-chevron-down"></i></button>
+            <div class="faq-a"><p>Sí, aceptamos transferencia, tarjetas de crédito/débito, Mercado Pago y efectivo en el local.</p></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-q">¿Puedo comprar online y retirar en el local? <i class="fa fa-chevron-down"></i></button>
+            <div class="faq-a"><p>¡Claro! Podés seleccionar "Retiro en sucursal" al finalizar tu compra. El pedido estará listo en 2-4 horas hábiles.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner container">
+      <div class="footer__brand">
+        <p class="footer__logo"><span class="logo-elite">ELITE</span><span class="logo-pc"> PC PARTS</span></p>
+        <p>Tu tienda de confianza para armar la PC de tus sueños.</p>
+        <div class="footer__social">
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-facebook"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+        </div>
+      </div>
+      <div class="footer__links"><h4>Productos</h4><a href="catalogo.html">Ver catálogo</a><a href="pcbuilder.html">PC Builder</a></div>
+      <div class="footer__links"><h4>Servicios</h4><a href="servicios.html">Servicio técnico</a></div>
+      <div class="footer__links"><h4>Contacto</h4><a href="contacto.html"><i class="fa fa-envelope"></i> contacto@elitepcparts.com</a></div>
+    </div>
+    <div class="footer__bottom"><p>&copy; 2026 Elite PC Parts. Todos los derechos reservados.</p></div>
+  </footer>
+  <script src="../js/firebase-init.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/contacto.js"></script>
+</body>
+</html>

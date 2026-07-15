@@ -1,0 +1,159 @@
+name: Deploy to S3 + CloudFront
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+# id-token: write is required for the OIDC (assume-role) auth path. It is harmless
+# for the static-keys path. contents: read is the default checkout permission.
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  STACK_NAME: elitepcparts-site
+  AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+  # Site bucket is managed OUTSIDE CloudFormation (ensured create-if-missing below),
+  # so re-runs never fail on an already-existing bucket.
+  SITE_BUCKET: elite-pc-parts-461839758888-us-east-2-an
+  SITE_BUCKET_REGION: us-east-2
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build site
+        run: npm run build
+
+      # The runner's bundled AWS CLI can lag behind new S3 features (e.g. the
+      # account-regional namespace bucket type, which needs the x-amz-bucket-namespace
+      # header). Install the latest v2 so bucket detection/creation works.
+      - name: Update AWS CLI to latest v2
+        run: |
+          curl -sSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscliv2.zip
+          unzip -q awscliv2.zip
+          sudo ./aws/install --update
+          aws --version
+
+      # Two auth paths — the workflow auto-selects based on whether the
+      # AWS_ROLE_ARN repo/org Variable is set:
+      #   • set   -> assume the IAM role via GitHub OIDC (keyless, recommended)
+      #   • unset -> use static AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY secrets
+      - name: Configure AWS credentials (OIDC role)
+        if: ${{ vars.AWS_ROLE_ARN != '' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          role-session-name: gha-elitepcparts-deploy
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Configure AWS credentials (access keys)
+        if: ${{ vars.AWS_ROLE_ARN == '' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Ensure site bucket exists (create if missing)
+        run: |
+          if aws s3api head-bucket --bucket "$SITE_BUCKET" --region "$SITE_BUCKET_REGION" 2>/dev/null; then
+            echo "Bucket already exists: $SITE_BUCKET"
+          else
+            echo "Creating bucket $SITE_BUCKET in $SITE_BUCKET_REGION"
+            # This bucket name uses the account-regional namespace convention
+            # (<prefix>-<accountId>-<region>-an), so CreateBucket must send the
+            # x-amz-bucket-namespace: account-regional header (--bucket-namespace),
+            # otherwise S3 returns MissingNamespaceHeader.
+            if [ "$SITE_BUCKET_REGION" = "us-east-1" ]; then
+              aws s3api create-bucket --bucket "$SITE_BUCKET" \
+                --bucket-namespace account-regional \
+                --region "$SITE_BUCKET_REGION"
+            else
+              aws s3api create-bucket --bucket "$SITE_BUCKET" \
+                --bucket-namespace account-regional \
+                --region "$SITE_BUCKET_REGION" \
+                --create-bucket-configuration LocationConstraint="$SITE_BUCKET_REGION"
+            fi
+            aws s3api put-public-access-block --bucket "$SITE_BUCKET" \
+              --public-access-block-configuration BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true
+            aws s3api put-bucket-encryption --bucket "$SITE_BUCKET" \
+              --server-side-encryption-configuration '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}'
+          fi
+
+      # A stack whose first CreateStack failed is left in ROLLBACK_COMPLETE (or
+      # REVIEW_IN_PROGRESS). CloudFormation cannot update a stack in these states,
+      # so `deploy` would fail with "is in ROLLBACK_COMPLETE state and can not be
+      # updated". Since the stack never successfully created any resources in that
+      # state, it is safe to delete it and let the next step recreate it.
+      - name: Clean up failed stack (if in an uncreatable state)
+        run: |
+          STATUS=$(aws cloudformation describe-stacks \
+            --stack-name "$STACK_NAME" \
+            --query "Stacks[0].StackStatus" \
+            --output text 2>/dev/null || echo "DOES_NOT_EXIST")
+          echo "Current stack status: $STATUS"
+          if [ "$STATUS" = "ROLLBACK_COMPLETE" ] || [ "$STATUS" = "REVIEW_IN_PROGRESS" ]; then
+            echo "Deleting stack $STACK_NAME (status $STATUS) so it can be recreated"
+            aws cloudformation delete-stack --stack-name "$STACK_NAME"
+            aws cloudformation wait stack-delete-complete --stack-name "$STACK_NAME"
+            echo "Stack deleted"
+          fi
+
+      - name: Provision infrastructure (idempotent)
+        run: |
+          aws cloudformation deploy \
+            --template-file infra/cloudformation.yml \
+            --stack-name "$STACK_NAME" \
+            --capabilities CAPABILITY_IAM \
+            --parameter-overrides SiteBucketName="$SITE_BUCKET" SiteBucketRegion="$SITE_BUCKET_REGION" \
+            --no-fail-on-empty-changeset
+
+      - name: Read stack outputs
+        run: |
+          read_output() {
+            aws cloudformation describe-stacks \
+              --stack-name "$STACK_NAME" \
+              --query "Stacks[0].Outputs[?OutputKey=='$1'].OutputValue" \
+              --output text
+          }
+          echo "BUCKET=$(read_output BucketName)" >> "$GITHUB_ENV"
+          echo "DIST_ID=$(read_output DistributionId)" >> "$GITHUB_ENV"
+          echo "SITE_URL=https://$(read_output DistributionDomainName)" >> "$GITHUB_ENV"
+
+      - name: Upload static assets (long cache)
+        run: |
+          aws s3 sync ./dist "s3://$BUCKET" --delete \
+            --exclude "*.html" \
+            --cache-control "public, max-age=31536000, immutable"
+
+      - name: Upload HTML (no cache)
+        run: |
+          aws s3 sync ./dist "s3://$BUCKET" \
+            --exclude "*" --include "*.html" \
+            --content-type "text/html; charset=utf-8" \
+            --cache-control "no-cache"
+
+      - name: Invalidate CloudFront
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "$DIST_ID" \
+            --paths "/*"
+
+      - name: Summary
+        run: echo "Deployed to $SITE_URL" >> "$GITHUB_STEP_SUMMARY"
