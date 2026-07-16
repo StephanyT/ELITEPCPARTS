@@ -2,13 +2,11 @@
 // CATÁLOGO — products loaded from Firestore (see src/js/data.js)
 // ============================================================
 
-let allProducts = [];               // filled once EPC.load() resolves
+let allProducts = [];
 const ITEMS_PER_PAGE = 9;
 let currentPage = 1;
 let filtered = [];
 
-// Build the category + brand checkboxes from the data so they always match what
-// Firestore actually contains, and size the price slider to the real range.
 function buildFilters() {
   const cats   = [...new Set(allProducts.map(p => p.category))].sort();
   const brands = [...new Set(allProducts.map(p => p.brand))].sort();
@@ -122,14 +120,12 @@ function renderPagination() {
   });
 }
 
-// Price slider live label
 const slider = document.getElementById('priceSlider');
 const sliderVal = document.getElementById('priceSliderVal');
 slider?.addEventListener('input', () => {
   sliderVal.textContent = '$' + parseInt(slider.value).toLocaleString('es-AR');
 });
 
-// Events
 document.getElementById('applyFilters')?.addEventListener('click', applyFilters);
 document.getElementById('clearFilters')?.addEventListener('click', () => {
   document.querySelectorAll('input[name="cat"]').forEach(c => c.checked = false);
@@ -153,30 +149,30 @@ document.getElementById('listView')?.addEventListener('click', () => {
   document.getElementById('gridView').classList.remove('active');
 });
 
-// ---------- Init: load catalog from Firestore, then wire filters ----------
-EPC.load()
-  .then(data => {
-    allProducts = data.products;
-    products = allProducts;            // share with main.js addToCart()
-    filtered = [...allProducts];
-    buildFilters();
+window.addEventListener('load', function() {
+  EPC.load()
+    .then(data => {
+      allProducts = data.products;
+      products = allProducts;
+      filtered = [...allProducts];
+      buildFilters();
 
-    // Pre-filter from URL params (?cat=, ?q=) now that checkboxes exist.
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlCat = urlParams.get('cat');
-    const urlQ   = urlParams.get('q');
-    if (urlCat) {
-      document.querySelectorAll('input[name="cat"]').forEach(cb => { cb.checked = cb.value === urlCat; });
-    }
-    if (urlQ) {
-      const si = document.getElementById('searchInput');
-      if (si) si.value = urlQ;
-    }
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlCat = urlParams.get('cat');
+      const urlQ   = urlParams.get('q');
+      if (urlCat) {
+        document.querySelectorAll('input[name="cat"]').forEach(cb => { cb.checked = cb.value === urlCat; });
+      }
+      if (urlQ) {
+        const si = document.getElementById('searchInput');
+        if (si) si.value = urlQ;
+      }
 
-    applyFilters();
-  })
-  .catch(err => {
-    console.error('No se pudo cargar el catálogo desde Firebase:', err);
-    const grid = document.getElementById('catalogGrid');
-    if (grid) grid.innerHTML = '<p style="color:var(--clr-muted);padding:2rem">No se pudieron cargar los productos.</p>';
-  });
+      applyFilters();
+    })
+    .catch(err => {
+      console.error('No se pudo cargar el catálogo desde Firebase:', err);
+      const grid = document.getElementById('catalogGrid');
+      if (grid) grid.innerHTML = '<p style="color:var(--clr-muted);padding:2rem">No se pudieron cargar los productos.</p>';
+    });
+});
