@@ -15,6 +15,7 @@ import { CartModule } from './cart/cart.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { EmailVerificationsModule } from './email_verifications/email_verification.module';
 import { LoggerMiddleware } from './logger.middleware';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { LoggerMiddleware } from './logger.middleware';
     CartModule,
     ReviewsModule,
     EmailVerificationsModule,
+    AuthModule,
   ],
 })
 export class AppModule {

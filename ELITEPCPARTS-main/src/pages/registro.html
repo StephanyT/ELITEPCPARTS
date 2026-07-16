@@ -143,14 +143,13 @@
 
     </div>
   </main>
-  <script src="../js/firebase-init.js"></script>
+
   <script src="../js/main.js"></script>
   <script src="../js/auth.js"></script>
   <script>
-    // Password strength
     document.getElementById('password').addEventListener('input', function() {
       const val = this.value;
-      const bar  = document.getElementById('pwdBar');
+      const bar   = document.getElementById('pwdBar');
       const label = document.getElementById('pwdLabel');
       let strength = 0;
       if (val.length >= 6)  strength++;
@@ -158,13 +157,12 @@
       if (/[A-Z]/.test(val)) strength++;
       if (/[0-9]/.test(val)) strength++;
       if (/[^A-Za-z0-9]/.test(val)) strength++;
-
       const levels = ['', 'Muy débil', 'Débil', 'Regular', 'Buena', 'Fuerte'];
       const colors = ['', '#ef4444', '#f97316', '#f59e0b', '#22c55e', '#6366f1'];
-      bar.style.width   = (strength * 20) + '%';
+      bar.style.width      = (strength * 20) + '%';
       bar.style.background = colors[strength] || 'transparent';
-      label.textContent = val ? levels[strength] || '' : '';
-      label.style.color = colors[strength];
+      label.textContent    = val ? levels[strength] || '' : '';
+      label.style.color    = colors[strength];
     });
 
     document.getElementById('togglePwd').addEventListener('click', function() {
@@ -174,14 +172,13 @@
       else { input.type = 'password'; icon.className = 'fa fa-eye'; }
     });
 
-    document.getElementById('registerForm').addEventListener('submit', function(e) {
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       clearErrors();
 
       const firstName = document.getElementById('firstName').value.trim();
       const lastName  = document.getElementById('lastName').value.trim();
       const email     = document.getElementById('email').value.trim();
-      const phone     = document.getElementById('phone').value.trim();
       const password  = document.getElementById('password').value;
       const confirm   = document.getElementById('confirm').value;
       const terms     = document.getElementById('terms').checked;
@@ -194,64 +191,29 @@
       if (!password || password.length < 6) { setError('password', 'Mínimo 6 caracteres'); valid = false; }
       if (password !== confirm) { setError('confirm', 'Las contraseñas no coinciden'); valid = false; }
       if (!terms) { setError('terms', 'Debes aceptar los términos'); valid = false; }
-
       if (!valid) return;
 
       const btn = document.getElementById('registerBtn');
       btn.disabled = true;
       btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Creando cuenta...';
 
-      auth.createUserWithEmailAndPassword(email, password)
-        .then((cred) => {
-          const user = cred.user;
-          return user.updateProfile({ displayName: `${firstName} ${lastName}` })
-            .then(() => db.collection('usuarios').doc(user.uid).set({
-              firstName,
-              lastName,
-              email,
-              phone,
-              createdAt: new Date().toLocaleDateString('es-PE'),
-            }))
-            .then(() => {
-              loginSuccess({ id: user.uid, firstName, lastName, email, phone });
-            });
-        })
-        .catch((err) => {
-          btn.disabled = false;
-          btn.innerHTML = 'Crear cuenta';
-          if (err.code === 'auth/email-already-in-use') {
-            setError('email', 'Ya existe una cuenta con ese email');
-          } else {
-            showAlert(err.message, 'error');
-          }
-        });
+      try {
+        const nombre = `${firstName} ${lastName}`;
+        const usuario = await registerWithBackend(nombre, email, password);
+        loginSuccess(usuario);
+      } catch (err) {
+        btn.disabled = false;
+        btn.innerHTML = 'Crear cuenta';
+        if (err.message.includes('duplicate') || err.message.includes('unique')) {
+          setError('email', 'Ya existe una cuenta con ese email');
+        } else {
+          showAlert(err.message || 'Error al crear la cuenta', 'error');
+        }
+      }
     });
 
     function socialLogin(provider) {
-      if (provider !== 'Google') {
-        showAlert(`Registro con ${provider} no está configurado.`, 'info');
-        return;
-      }
-      const gp = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(gp)
-        .then((cred) => {
-          const u = cred.user;
-          const firstName = u.displayName?.split(' ')[0] || '';
-          const lastName  = u.displayName?.split(' ').slice(1).join(' ') || '';
-          return db.collection('usuarios').doc(u.uid)
-            .set({ firstName, lastName, email: u.email, phone: u.phoneNumber || '' }, { merge: true })
-            .then(() => loginSuccess({ id: u.uid, firstName, lastName, email: u.email }));
-        })
-        .catch((err) => {
-          if (err.code === 'auth/popup-closed-by-user') return;
-          if (err.code === 'auth/unauthorized-domain') {
-            showAlert('Este dominio aún no está autorizado para Google. Registrate con email y contraseña (funciona en cualquier despliegue), o pedí al administrador que agregue este dominio en Firebase → Authentication → Authorized domains.', 'info');
-          } else if (err.code === 'auth/operation-not-allowed') {
-            showAlert('El registro con Google no está habilitado en este proyecto. Usá email y contraseña.', 'info');
-          } else {
-            showAlert('No se pudo continuar con Google.', 'error');
-          }
-        });
+      showAlert(`Registro con ${provider} no está disponible por ahora.`, 'info');
     }
   </script>
 </body>

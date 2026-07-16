@@ -1,11 +1,9 @@
-// ============================================================
-// AUTH — Firebase Authentication + shared header/session glue
-// ============================================================
-// Firebase Auth is the source of truth. A lightweight profile is mirrored into
-// localStorage ('epc_session') so the header/guards can paint synchronously on
-// first load; onAuthStateChanged then refines it and drives the cart sync.
+const BACKEND = 'http://localhost:3000';
 
-// ---------- form helpers (used by login.html / registro.html) ----------
+const IN_PAGES    = location.pathname.includes('/src/pages/');
+const PAGE_PREFIX = IN_PAGES ? '' : 'src/pages/';
+const HOME_HREF   = IN_PAGES ? '../../index.html' : 'index.html';
+
 function setError(fieldId, msg) {
   const input = document.getElementById(fieldId);
   const err   = document.getElementById('err-' + fieldId);
@@ -29,12 +27,6 @@ function showAlert(msg, type = 'error') {
   alert.style.display = 'flex';
 }
 
-// ---------- path prefix (repo root index.html vs /src/pages/*) ----------
-const IN_PAGES    = location.pathname.includes('/src/pages/');
-const PAGE_PREFIX = IN_PAGES ? '' : 'src/pages/';
-const HOME_HREF   = IN_PAGES ? '../../index.html' : 'index.html';
-
-// ---------- cached session (for instant, synchronous header render) ----------
 function getSession() {
   const raw = localStorage.getItem('epc_session') || sessionStorage.getItem('epc_session');
   return raw ? JSON.parse(raw) : null;
@@ -47,7 +39,6 @@ function clearSession() {
   sessionStorage.removeItem('epc_session');
 }
 
-// ---------- shared auth state for other page scripts ----------
 window.EPCAuth = {
   uid: null,
   profile: null,
@@ -55,10 +46,9 @@ window.EPCAuth = {
   onUser(cb) { this._cbs.push(cb); if (this.profile) cb(this.profile); },
 };
 function notifyUser() {
-  EPCAuth._cbs.forEach(cb => { try { cb(EPCAuth.profile); } catch (e) { /* noop */ } });
+  EPCAuth._cbs.forEach(cb => { try { cb(EPCAuth.profile); } catch (e) {} });
 }
 
-// ---------- header account widget (idempotent) ----------
 function accountEl() {
   return document.querySelector('.user-menu-wrap')
       || document.querySelector('a.icon-btn[href*="cuenta"], a.icon-btn[title="Mi cuenta"]');
@@ -67,18 +57,17 @@ function accountEl() {
 function updateHeaderAuth(session) {
   const el = accountEl();
   if (!el) return;
-
   if (session) {
-    const initials = ((session.firstName?.[0] || session.email?.[0] || 'U') +
-                      (session.lastName?.[0] || '')).toUpperCase();
+    const nombre = session.nombre || session.firstName || '';
+    const initials = (nombre[0] || session.email?.[0] || 'U').toUpperCase();
     el.outerHTML = `
       <div class="user-menu-wrap">
-        <button class="user-avatar-btn" id="userMenuBtn" title="${session.firstName || session.email}">
+        <button class="user-avatar-btn" id="userMenuBtn" title="${nombre || session.email}">
           <span class="user-initials">${initials}</span>
         </button>
         <div class="user-dropdown" id="userDropdown">
           <div class="user-dropdown__header">
-            <strong>${(session.firstName || '') + ' ' + (session.lastName || '')}</strong>
+            <strong>${nombre}</strong>
             <span>${session.email || ''}</span>
           </div>
           <a href="${PAGE_PREFIX}cuenta.html"><i class="fa fa-user"></i> Mi cuenta</a>
@@ -101,123 +90,48 @@ function updateHeaderAuth(session) {
   }
 }
 
-// ---------- logout ----------
 function logout() {
-  const done = () => { clearSession(); localStorage.removeItem('epc_cart'); localStorage.removeItem('epc_cart_owner'); location.href = HOME_HREF; };
-  if (window.auth) auth.signOut().then(done).catch(done);
-  else done();
+  clearSession();
+  localStorage.removeItem('epc_cart');
+  localStorage.removeItem('epc_cart_owner');
+  location.href = HOME_HREF;
 }
 
-// ---------- redirect used by login.html / registro.html on success ----------
 function loginSuccess(profile) {
   cacheSession(profile);
   const redirect = new URLSearchParams(location.search).get('redirect') || 'cuenta.html';
   location.href = redirect;
 }
 
-// ---------- guard for pages that require a logged-in user ----------
 function requireAuth() {
-  if (!window.auth) return;
-  auth.onAuthStateChanged(user => {
-    if (!user) {
-      const current = encodeURIComponent(location.pathname.split('/').pop() + location.hash);
-      location.href = 'login.html?redirect=' + current;
-    }
-  });
-}
-
-// ---------- cart <-> Firestore sync on login ----------
-// Merge the anonymous/local cart with the online (Firestore) cart — quantities
-// for the same product id are summed — instead of one replacing the other. The
-// merged result becomes both the active cart and the persisted online cart.
-function mergeCarts(a, b) {
-  const merged = [];
-  const byId = {};
-  [...a, ...b].forEach(item => {
-    if (!item || item.id == null) return;
-    const existing = byId[item.id];
-    if (existing) {
-      existing.qty = (existing.qty || 1) + (item.qty || 1);
-    } else {
-      const copy = { ...item, qty: item.qty || 1 };
-      byId[item.id] = copy;
-      merged.push(copy);
-    }
-  });
-  return merged;
-}
-
-async function syncCartOnLogin(uid) {
-  if (!window.db) return;
-  try {
-    const doc = await db.collection('usuarios').doc(uid).get();
-    const remote = doc.exists && Array.isArray(doc.data().cart) ? doc.data().cart : [];
-    const local  = (typeof cart !== 'undefined' && Array.isArray(cart)) ? cart : [];
-
-    // The guest-cart sum-merge must run ONCE per account on this device. Because
-    // onAuthStateChanged fires on every page load, re-summing local+remote here
-    // would double every quantity on each navigation (that's what caused the
-    // runaway cart totals). We only fold the guest cart into the account the
-    // first time this device's cart meets the account AND the two actually differ:
-    //   • epc_cart_owner === uid -> this browser's cart already belongs to the
-    //     account and is kept mirrored by saveCart(), so just adopt the online cart.
-    //   • local deep-equals remote -> nothing new to fold in (steady mirrored
-    //     state), so adopt the online cart instead of summing it with itself.
-    const alreadyOwned = localStorage.getItem('epc_cart_owner') === uid;
-    const sameCart     = JSON.stringify(local) === JSON.stringify(remote);
-
-    if (alreadyOwned || sameCart) {
-      cart = remote;
-      localStorage.setItem('epc_cart', JSON.stringify(cart));
-    } else {
-      const merged = mergeCarts(local, remote);
-      cart = merged;
-      localStorage.setItem('epc_cart', JSON.stringify(cart));
-      // Persist the one-time merged union so the online cart stays in sync.
-      await db.collection('usuarios').doc(uid).set({ cart: merged }, { merge: true });
-    }
-    localStorage.setItem('epc_cart_owner', uid);
-
-    if (typeof updateCartBadge === 'function') updateCartBadge();
-    if (typeof renderCart === 'function') renderCart();   // refresh the carrito page if open
-  } catch (e) {
-    console.error('No se pudo sincronizar el carrito:', e);
+  const session = getSession();
+  if (!session) {
+    const current = encodeURIComponent(location.pathname.split('/').pop() + location.hash);
+    location.href = 'login.html?redirect=' + current;
   }
 }
 
-// ============================================================
-// Boot: instant paint from cache, then follow Firebase auth state
-// ============================================================
-updateHeaderAuth(getSession());
-
-if (window.auth) {
-  auth.onAuthStateChanged(async (user) => {
-    if (user) {
-      EPCAuth.uid = user.uid;
-      let data = {};
-      try {
-        const d = await db.collection('usuarios').doc(user.uid).get();
-        if (d.exists) data = d.data();
-      } catch (e) { /* profile doc optional */ }
-
-      const parts = (user.displayName || '').split(' ');
-      const profile = {
-        id:        user.uid,
-        firstName: data.firstName || parts[0] || '',
-        lastName:  data.lastName  || parts.slice(1).join(' ') || '',
-        email:     user.email || data.email || '',
-        phone:     data.phone || '',
-      };
-      EPCAuth.profile = profile;
-      cacheSession(profile);
-      updateHeaderAuth(profile);
-      notifyUser();
-      syncCartOnLogin(user.uid);
-    } else {
-      EPCAuth.uid = null;
-      EPCAuth.profile = null;
-      clearSession();
-      updateHeaderAuth(null);
-    }
+async function registerWithBackend(nombre, email, password) {
+  const res = await fetch(`${BACKEND}/usuarios`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nombre, email, password }),
   });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.message || 'Error al registrar');
+  }
+  return res.json();
 }
+
+async function loginWithBackend(email, password) {
+  const res = await fetch(`${BACKEND}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
+  if (!res.ok) throw new Error('Email o contraseña incorrectos');
+  return res.json();
+}
+
+updateHeaderAuth(getSession());
