@@ -1,122 +1,176 @@
-**Elite PC Parts **
+# Elite PC Parts
 
-Tienda en línea de componentes para PC. Proyecto desarrollado con frontend estático, backend en NestJS y base de datos PostgreSQL, todo dockerizado.
+Tienda en línea de componentes para PC. Backend en **NestJS**, base de datos **PostgreSQL** y frontend servido con **Nginx**. Todo el proyecto se ejecuta mediante **Docker Compose**.
 
+---
 
-**Arquitectura**
+# Arquitectura
 
-El proyecto corre en 3 contenedores Docker:
+El proyecto está compuesto por tres contenedores Docker:
 
-ContenedorTecnologíaPuertofrontendnginxpuerto 80 (localhost)backendNestJS (Node.js)puerto 3000dbPostgreSQL 15interno
+| Contenedor | Tecnología | Puerto | Descripción |
+|------------|------------|--------|-------------|
+| **frontend** | Nginx | 80 | Sirve la aplicación web. |
+| **backend** | NestJS (Node.js) | 3000 | API REST y lógica de negocio. |
+| **db** | PostgreSQL 15 | Interno | Base de datos del sistema. |
 
-El frontend consume el backend por http://localhost:3000. La base de datos no tiene puerto público — solo el backend puede acceder a ella.
+El frontend consume el backend mediante:
 
+```text
+http://localhost:3000
+```
 
-**Requisitos**
+La base de datos **no expone un puerto público** y solo es accesible desde la red interna de Docker.
 
+---
 
-Docker Desktop
+# Requisitos
 
+Antes de ejecutar el proyecto solo necesitas instalar:
 
-No necesitas instalar Node.js ni PostgreSQL — Docker se encarga de todo.
+- Docker Desktop
 
+> **No es necesario instalar Node.js ni PostgreSQL.**
 
-**Cómo correr el proyecto**
+---
 
-bashgit clone https://github.com/tu-usuario/ELITEPCPARTS-main.git
+# Cómo ejecutar el proyecto
+
+Clona el repositorio:
+
+```bash
+git clone https://github.com/tu-usuario/ELITEPCPARTS-main.git
+```
+
+Ingresa al proyecto:
+
+```bash
 cd ELITEPCPARTS-main
+```
+
+Levanta todos los servicios:
+
+```bash
 docker compose up
+```
 
-Eso levanta los 3 contenedores automáticamente.
+---
 
-URLDescripciónhttp://localhostSitio web (frontend)http://localhost:3000/apiDocumentación Swagger de la API
+# Acceso al proyecto
 
+Una vez iniciados los contenedores podrás acceder a:
 
-**Documentación de la API**
+| Servicio | URL |
+|----------|-----|
+| Sitio web | http://localhost |
+| Swagger API | http://localhost:3000/api |
 
-La API está documentada con Swagger en http://localhost:3000/api.
+---
 
-Endpoints principales:
+# Endpoints principales
 
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| POST | `/auth/login` | Iniciar sesión |
+| POST | `/usuarios` | Registrar usuario |
+| GET | `/usuarios` | Listar usuarios |
+| GET | `/components` | Listar componentes |
+| POST | `/orders` | Crear orden |
+| GET | `/cart` | Ver carrito |
+| GET | `/reviews` | Ver reseñas |
 
-POST /auth/login — Iniciar sesión
-POST /usuarios — Registrar usuario
-GET /usuarios — Listar usuarios
-GET /components — Listar componentes
-POST /orders — Crear orden
-GET /cart — Ver carrito
-GET /reviews — Ver reseñas
+---
 
+# Tecnologías utilizadas
 
+## Backend
 
-**Tecnologías**
+- NestJS
+- TypeORM
+- PostgreSQL
+- Swagger
+- class-validator
 
-Backend
+## Frontend
 
+- HTML
+- CSS
+- JavaScript (Vanilla)
+- Nginx
 
-NestJS — framework de Node.js
-TypeORM — ORM para conectar con PostgreSQL sin escribir SQL
-PostgreSQL — base de datos relacional
-Swagger — documentación automática de la API
-class-validator — validación de datos en los DTOs
+## Infraestructura
 
+- Docker
+- Docker Compose
 
-**Frontend**
+---
 
+# Variables de entorno
 
-HTML, CSS, JavaScript vanilla
-nginx — servidor web dentro del contenedor
+Las variables están definidas en el archivo **docker-compose.yml**.
 
+```env
+DB_HOST=db
+DB_PORT=5432
+DB_USER=postgres
+DB_PASS=postgres
+DB_NAME=elitepcparts
+```
 
-**Infraestructura**
+---
 
+# Estructura del proyecto
 
-Docker + Docker Compose — contenedores para backend, BD y frontend
-
-
-
-**Estructura del proyecto**
-
+```text
 ELITEPCPARTS-main/
 ├── backend/
 │   ├── src/
-│   │   ├── auth/           # Módulo de autenticación
-│   │   ├── usuarios/       # Módulo de usuarios
-│   │   ├── components/     # Módulo de componentes
-│   │   ├── orders/         # Módulo de órdenes
-│   │   ├── cart/           # Módulo de carrito
-│   │   ├── reviews/        # Módulo de reseñas
-│   │   ├── app.module.ts   # Configuración principal y conexión a PostgreSQL
-│   │   ├── main.ts         # Punto de entrada del servidor
-│   │   └── logger.middleware.ts  # Middleware que loguea cada petición
+│   │   ├── auth/
+│   │   ├── usuarios/
+│   │   ├── components/
+│   │   ├── orders/
+│   │   ├── cart/
+│   │   ├── reviews/
+│   │   ├── app.module.ts
+│   │   ├── main.ts
+│   │   └── logger.middleware.ts
 │   └── Dockerfile
 ├── src/
-│   ├── pages/              # Páginas HTML
+│   ├── pages/
 │   └── js/
-│       └── auth.js         # Lógica de login y registro (conecta con el backend)
-└── docker-compose.yml      # Orquestación de los 3 contenedores
+│       └── auth.js
+└── docker-compose.yml
+```
 
+---
 
-**Variables de entorno**
+# Cambios realizados (Evidencia 3)
 
-Definidas en docker-compose.yml:
+- Migración de Firebase a **NestJS + PostgreSQL**.
+- El inicio de sesión y registro ahora utilizan un backend propio.
+- La información se almacena en PostgreSQL mediante TypeORM.
+- Se implementó un middleware de **Logger** para registrar todas las peticiones HTTP.
+- Todo el sistema fue dockerizado utilizando **Docker Compose** para facilitar su despliegue.
 
-DB_HOST=db
+---
 
-DB_PORT=5432
+# Flujo de la aplicación
 
-DB_USER=postgres
+```text
+Usuario
+   │
+   ▼
+Frontend (Nginx)
+   │
+   ▼
+Backend (NestJS)
+   │
+   ▼
+PostgreSQL
+```
 
-DB_PASS=postgres
+---
 
-DB_NAME=elitepcparts
+# Autor
 
-
-**Evidencia 3 — Cambios principales**
-
-
-Migración de Firebase a NestJS + PostgreSQL
-Login y registro ahora van al backend propio en vez de Firebase Authentication
-Los datos se guardan en PostgreSQL en vez de Firebase Firestore
-Se agregó middleware de logger para registrar cada petición en consola
-Todo dockerizado con docker-compose
+Proyecto desarrollado para la Evidencia 3 del curso de Desarrollo y Soporte de Aplicaciones Multiplataforma.
