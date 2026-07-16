@@ -42,7 +42,7 @@
         <span></span><span></span><span></span>
       </button>
 
-    
+
     </div>
 
     <!-- Mobile nav -->
@@ -52,43 +52,61 @@
       <a href="src/pages/servicios.html">Servicios</a>
       <a href="src/pages/pcbuilder.html">PC Builder</a>
       <a href="src/pages/contacto.html">Contacto</a>
-      </nav>
+    </nav>
   </header>
 
   <main>
 
     <!-- HERO -->
+    <!-- HERO -->
     <section class="hero">
       <div class="hero__content container">
+
         <div class="hero__text">
+
           <p class="hero__tag">La mejor tienda de componentes</p>
-          <h1>Arma tu PC<br /><span>de tus sueños</span></h1>
-          <p class="hero__sub">Encuentra los mejores componentes, placas, procesadores y periféricos al mejor precio.
-            Envío a todo el país.</p>
+
+          <h1>
+            Arma tu PC
+            <span>de tus sueños</span>
+          </h1>
+
+          <p class="hero__sub">
+            Encuentra los mejores componentes, placas, procesadores y periféricos
+            al mejor precio. Envío a todo el país.
+          </p>
+
           <div class="hero__btns">
-            <a href="src/pages/catalogo.html" class="btn btn--primary">Ver productos</a>
-            <a href="src/pages/pcbuilder.html" class="btn btn--outline">PC Builder</a>
+            <a href="src/pages/catalogo.html" class="btn btn--primary">
+              Ver productos
+            </a>
+
+            <a href="src/pages/pcbuilder.html" class="btn btn--outline">
+              PC Builder
+            </a>
           </div>
+
           <div class="hero__stats">
+
             <div class="stat">
               <strong>+500</strong>
               <span>Productos</span>
             </div>
+
             <div class="stat">
               <strong>+3000</strong>
               <span>Clientes</span>
             </div>
+
             <div class="stat">
               <strong>5★</strong>
               <span>Calificación</span>
             </div>
+
           </div>
+
         </div>
-        <div class="hero__image">
-          <div class="img-placeholder hero-img">
-            <i class="fa fa-desktop"></i>
-          </div>
-        </div>
+
       </div>
     </section>
 
@@ -163,8 +181,9 @@
             <a href="src/pages/pcbuilder.html" class="btn btn--primary">Empezar a armar</a>
           </div>
           <div class="builder-banner__image">
-            <div class="img-placeholder builder-img">
-              <i class="fa fa-tools"></i>
+            <div class="builder-img">
+              <img src="src/assets/images/pcbuilder-banner.webp" alt="Componentes para armar una PC"
+                class="builder-photo">
             </div>
           </div>
         </div>
@@ -283,18 +302,29 @@
     </div>
   </footer>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="src/js/firebase-init.js"></script>
-<script src="src/js/data.js"></script>
-<script src="src/js/main.js"></script>
-<script src="src/js/auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="src/js/firebase-init.js"></script>
+  <script src="src/js/data.js"></script>
+  <script src="src/js/main.js"></script>
+  <script src="src/js/auth.js"></script>
+
+  <script>
     function searchRedirect() {
-      const q = document.getElementById('headerSearch').value.trim();
-      if (q) window.location.href = 'src/pages/catalogo.html?q=' + encodeURIComponent(q);
+      const q = document.getElementById("headerSearch").value.trim();
+
+      if (q) {
+        window.location.href =
+          "src/pages/catalogo.html?q=" + encodeURIComponent(q);
+      }
     }
-    document.getElementById('headerSearch').addEventListener('keydown', e => {
-      if (e.key === 'Enter') searchRedirect();
+
+    document.getElementById("headerSearch").addEventListener("keydown", function (e) {
+
+      if (e.key === "Enter") {
+        searchRedirect();
+      }
+
     });
   </script>
 </body>
