@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Usuario } from './usuarios/usuario.entity';
 import { Component } from './components/component.entity';
@@ -14,6 +14,7 @@ import { OrderItemsModule } from './order_items/order_items.module';
 import { CartModule } from './cart/cart.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { EmailVerificationsModule } from './email_verifications/email_verification.module';
+import { LoggerMiddleware } from './logger.middleware';
 
 @Module({
   imports: [
@@ -36,4 +37,8 @@ import { EmailVerificationsModule } from './email_verifications/email_verificati
     EmailVerificationsModule,
   ],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}

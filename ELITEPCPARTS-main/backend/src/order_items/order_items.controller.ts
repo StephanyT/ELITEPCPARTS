@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Delete, Param, Body } from '@nestjs/common';
 import { OrderItemsService } from './order_items.service';
-import { OrderItem } from './order-item.entity';
 import { ApiTags, ApiBody } from '@nestjs/swagger';
+import { CreateOrderItemDto } from './order-item.dto';
 
 @ApiTags('order_items')
 @Controller('order_items')
@@ -20,8 +20,8 @@ export class OrderItemsController {
 
   @Post()
   @ApiBody({ schema: { example: { cantidad: 1, precio_unitario: 1599.99 } } })
-  create(@Body() data: Partial<OrderItem>) {
-    return this.orderItemsService.create(data);
+  create(@Body() createOrderItemDto: CreateOrderItemDto) {
+    return this.orderItemsService.create(createOrderItemDto);
   }
 
   @Delete(':id')

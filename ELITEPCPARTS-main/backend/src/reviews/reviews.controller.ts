@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Delete, Param, Body } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
-import { Review } from './review.entity';
 import { ApiTags, ApiBody } from '@nestjs/swagger';
+import { CreateReviewDto } from './review.dto';
 
 @ApiTags('reviews')
 @Controller('reviews')
@@ -20,8 +20,8 @@ export class ReviewsController {
 
   @Post()
   @ApiBody({ schema: { example: { calificacion: 5, comentario: 'Excelente producto' } } })
-  create(@Body() data: Partial<Review>) {
-    return this.reviewsService.create(data);
+  create(@Body() createReviewDto: CreateReviewDto) {
+    return this.reviewsService.create(createReviewDto);
   }
 
   @Delete(':id')
