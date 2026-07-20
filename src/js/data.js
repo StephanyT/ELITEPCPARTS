@@ -1,16 +1,10 @@
 // ============================================================
-// SHARED DATA LAYER — Firestore `components` -> UI models
+// SHARED DATA LAYER — Backend NestJS -> UI models
 // ============================================================
-// Loads the Firestore `components` collection (seeded from components.json via
-// scripts/import-components.mjs) exactly once, normalizes it into the shapes the
-// page scripts expect, and caches the promise. Exposed as a classic global
-// (window.EPC) so the non-module page scripts can `EPC.load().then(...)`.
-//
-// Must be loaded AFTER firebase-init.js (which defines window.db) and BEFORE the
-// per-page scripts (main.js / catalogo.js / producto.js / pcbuilder.js).
 
 (function () {
-  // Firestore type id -> Spanish category label shown in the UI.
+  const API_URL = 'http://localhost:3000/components';
+
   const CATEGORY_LABELS = {
     cpu: 'Procesadores',
     gpu: 'Placas de Video',
@@ -21,92 +15,190 @@
     case: 'Gabinetes',
   };
 
-  // Type id -> PC Builder slot id (motherboard -> mobo; the rest map 1:1).
   const TYPE_TO_SLOT = {
-    cpu: 'cpu', motherboard: 'mobo', ram: 'ram',
-    storage: 'storage', gpu: 'gpu', psu: 'psu', case: 'case',
+    cpu: 'cpu',
+    motherboard: 'mobo',
+    ram: 'ram',
+    storage: 'storage',
+    gpu: 'gpu',
+    psu: 'psu',
+    case: 'case',
   };
 
-  // Multi-word brands listed first so "Fractal Design" wins over a bare "Fractal".
   const KNOWN_BRANDS = [
-    'Fractal Design', 'Cooler Master', 'Lian Li', 'be quiet!',
-    'NVIDIA', 'AMD', 'Intel', 'ASRock', 'ASUS', 'Gigabyte', 'MSI',
-    'Corsair', 'Kingston', 'G.SKILL', 'Samsung', 'Seagate', 'Seasonic',
-    'EVGA', 'NZXT', 'Noctua', 'Logitech', 'WD',
+    'Fractal Design',
+    'Cooler Master',
+    'Lian Li',
+    'be quiet!',
+    'NVIDIA',
+    'AMD',
+    'Intel',
+    'ASRock',
+    'ASUS',
+    'Gigabyte',
+    'MSI',
+    'Corsair',
+    'Kingston',
+    'G.SKILL',
+    'Samsung',
+    'Seagate',
+    'Seasonic',
+    'EVGA',
+    'NZXT',
+    'Noctua',
+    'Logitech',
+    'WD',
   ];
 
   function deriveBrand(name) {
-    const n = String(name).toLowerCase();
-    for (const b of KNOWN_BRANDS) if (n.includes(b.toLowerCase())) return b;
-    return String(name).split(' ')[0];
+    const productName = String(name || '').toLowerCase();
+
+    for (const brand of KNOWN_BRANDS) {
+      if (productName.includes(brand.toLowerCase())) {
+        return brand;
+      }
+    }
+
+    return String(name || '').split(' ')[0];
   }
 
-  // The Firestore `rating` field is a string like "(88)". Per product spec: take
-  // the number in the parentheses as a percentage and map it onto 5 stars, where
-  // 100% = 5 stars and 1% = 0.05 stars. "(88)" -> 88% -> 4.4 stars.
-  function pctFromField(field) {
-    const m = String(field).match(/\d+/);
-    return m ? parseInt(m[0], 10) : 0;
-  }
-  function ratingFromField(field) {
-    return Math.max(0, Math.min(5, (pctFromField(field) / 100) * 5));
+  function specValue(specs, expression) {
+    const match = String(specs || '').match(expression);
+
+    return match
+      ? match[0].toUpperCase().replace(/\s+/g, '')
+      : null;
   }
 
-  // Pull a compatibility token out of the free-text specs (best effort).
-  function specValue(specs, re) {
-    const m = String(specs || '').match(re);
-    return m ? m[0].toUpperCase().replace(/\s+/g, '') : null;
-  }
+  function normalizeComponent(component) {
+    const type = component.categoria;
 
-  // One Firestore type doc -> flat, UI-ready product records.
-  function normalizeType(typeDoc) {
-    const type = typeDoc.id;
-    return (typeDoc.options || []).map((opt) => ({
-      id: opt.id,                                    // e.g. "cpu_0"
-      type,                                          // e.g. "cpu"
-      name: opt.name,
-      category: CATEGORY_LABELS[type] || typeDoc.name || type,
-      brand: deriveBrand(opt.name),
-      specs: opt.specs || '',
-      price: opt.price,
-      rating: ratingFromField(opt.rating),           // 0..5 stars
-      reviews: pctFromField(opt.rating),             // the raw parenthesised number
-      categories: opt.categories || [],              // use-case tags (gaming, budget, ...)
-      image: opt.image,
-      socket: specValue(opt.specs, /LGA\s?\d+|AM5|AM4/i),
-      memType: specValue(opt.specs, /DDR\d/i),
-    }));
+    /*
+     * PostgreSQL puede devolver el precio como texto.
+     * Number() lo convierte a un número para poder sumarlo.
+     */
+    const price = Number(component.precio);
+
+    return {
+      id: String(component.id),
+      type: type,
+      name: component.nombre,
+      category: CATEGORY_LABELS[type] || type,
+      brand: deriveBrand(component.nombre),
+
+      /*
+       * Actualmente el backend no devuelve descripción.
+       * Se deja vacío para no romper el PC Builder.
+       */
+      specs: component.descripcion || '',
+
+      price: Number.isNaN(price) ? 0 : price,
+      rating: 0,
+      reviews: 0,
+      categories: [],
+      image: component.imagen_url,
+      available: component.disponible,
+
+      socket: specValue(
+        component.descripcion,
+        /LGA\s?\d+|AM5|AM4/i
+      ),
+
+      memType: specValue(
+        component.descripcion,
+        /DDR\d/i
+      ),
+    };
   }
 
   let cache = null;
 
-  // Returns a cached promise of { products, byType, bySlot }.
-  function load() {
-    if (cache) return cache;
-    cache = window.db.collection('components').get().then((snap) => {
-      const byType = {};
-      let products = [];
-      snap.forEach((doc) => {
-        const data = { id: doc.id, ...doc.data() };
-        byType[doc.id] = data;
-        products = products.concat(normalizeType(data));
-      });
+  async function loadComponents() {
+    const response = await fetch(API_URL);
 
-      // Group into PC Builder slots with the fields the builder UI needs.
-      const bySlot = {};
-      products.forEach((p) => {
-        const slot = TYPE_TO_SLOT[p.type];
-        if (!slot) return;
-        (bySlot[slot] = bySlot[slot] || []).push({
-          id: p.id, name: p.name, desc: p.specs, price: p.price,
-          socket: p.socket, memType: p.memType, image: p.image,
-        });
-      });
+    if (!response.ok) {
+      throw new Error(
+        `No se pudieron cargar los componentes. Código: ${response.status}`
+      );
+    }
 
-      return { products, byType, bySlot };
+    const data = await response.json();
+
+    if (!Array.isArray(data)) {
+      throw new Error('El backend no devolvió una lista de componentes');
+    }
+
+    const products = data
+      .filter((component) => component.disponible !== false)
+      .map(normalizeComponent);
+
+    const byType = {};
+    const bySlot = {};
+
+    products.forEach((product) => {
+      /*
+       * Agrupación por categoría.
+       */
+      if (!byType[product.type]) {
+        byType[product.type] = {
+          id: product.type,
+          name: CATEGORY_LABELS[product.type] || product.type,
+          options: [],
+        };
+      }
+
+      byType[product.type].options.push(product);
+
+      /*
+       * Agrupación para el PC Builder.
+       */
+      const slot = TYPE_TO_SLOT[product.type];
+
+      if (!slot) {
+        return;
+      }
+
+      if (!bySlot[slot]) {
+        bySlot[slot] = [];
+      }
+
+      bySlot[slot].push({
+        id: product.id,
+        name: product.name,
+        desc: product.specs,
+        price: product.price,
+        socket: product.socket,
+        memType: product.memType,
+        image: product.image,
+      });
     });
+
+    return {
+      products,
+      byType,
+      bySlot,
+    };
+  }
+
+  function load() {
+    if (!cache) {
+      cache = loadComponents().catch((error) => {
+        /*
+         * Permite volver a intentar la carga después de un error.
+         */
+        cache = null;
+        console.error('Error al cargar componentes:', error);
+        throw error;
+      });
+    }
+
     return cache;
   }
 
-  window.EPC = { load, deriveBrand, CATEGORY_LABELS, TYPE_TO_SLOT };
+  window.EPC = {
+    load,
+    deriveBrand,
+    CATEGORY_LABELS,
+    TYPE_TO_SLOT,
+  };
 })();

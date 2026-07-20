@@ -15,12 +15,13 @@ const products = [];
 for (const cat of raw) {
   for (const opt of cat.options) {
     products.push({
-      nombre:     opt.name,
-      categoria:  cat.id,
-      tipo:       cat.id,
-      precio:     opt.price,
+      nombre: opt.name,
+      categoria: cat.id,
+      tipo: cat.id,
+      precio: opt.price,
       imagen_url: `/src/assets/images/products/${opt.id}.webp`,
       descripcion: opt.specs || '',
+      disponible: true,
     });
   }
 }
