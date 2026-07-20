@@ -2,183 +2,469 @@
 // PC BUILDER
 // ============================================================
 
-// Step metadata (titles/descriptions). The `components` list of each step is
-// filled from Firestore (grouped by slot) once EPC.load() resolves.
+// Datos de cada etapa del PC Builder.
+// Los componentes se cargan desde el backend mediante EPC.load().
 const stepMeta = [
-  { slot: 'cpu',     title: 'Seleccioná un Procesador',              desc: 'El procesador es el cerebro de tu PC. Elegí según tu uso: gaming, edición o trabajo.' },
-  { slot: 'mobo',    title: 'Seleccioná una Placa Madre',            desc: 'La placa madre conecta todos los componentes. Debe ser compatible con tu procesador.' },
-  { slot: 'ram',     title: 'Seleccioná Memoria RAM',                desc: 'La RAM determina cuántos programas podés tener abiertos simultáneamente.' },
-  { slot: 'storage', title: 'Seleccioná Almacenamiento',            desc: 'Elegí dónde guardar tu sistema operativo, juegos y archivos.' },
-  { slot: 'gpu',     title: 'Seleccioná una Placa de Video',         desc: 'La GPU determina el rendimiento gráfico para gaming, edición y diseño.' },
-  { slot: 'psu',     title: 'Seleccioná una Fuente de Alimentación', desc: 'La fuente debe tener suficientes watts para todos tus componentes.' },
-  { slot: 'case',    title: 'Seleccioná un Gabinete',                desc: 'El gabinete aloja todos los componentes. Elegí el que se adapte a tu espacio y estilo.' },
+  {
+    slot: 'cpu',
+    title: 'Seleccioná un Procesador',
+    desc: 'El procesador es el cerebro de tu PC. Elegí según tu uso: gaming, edición o trabajo.',
+  },
+  {
+    slot: 'mobo',
+    title: 'Seleccioná una Placa Madre',
+    desc: 'La placa madre conecta todos los componentes. Debe ser compatible con tu procesador.',
+  },
+  {
+    slot: 'ram',
+    title: 'Seleccioná Memoria RAM',
+    desc: 'La RAM determina cuántos programas podés tener abiertos simultáneamente.',
+  },
+  {
+    slot: 'storage',
+    title: 'Seleccioná Almacenamiento',
+    desc: 'Elegí dónde guardar tu sistema operativo, juegos y archivos.',
+  },
+  {
+    slot: 'gpu',
+    title: 'Seleccioná una Placa de Video',
+    desc: 'La GPU determina el rendimiento gráfico para gaming, edición y diseño.',
+  },
+  {
+    slot: 'psu',
+    title: 'Seleccioná una Fuente de Alimentación',
+    desc: 'La fuente debe tener suficientes watts para todos tus componentes.',
+  },
+  {
+    slot: 'case',
+    title: 'Seleccioná un Gabinete',
+    desc: 'El gabinete aloja todos los componentes. Elegí el que se adapte a tu espacio y estilo.',
+  },
 ];
 
-// Populated from Firestore in the init block below.
-let builderSteps = stepMeta.map(m => ({ ...m, components: [] }));
+// Se llenará con los componentes enviados por el backend.
+let builderSteps = stepMeta.map(step => ({
+  ...step,
+  components: [],
+}));
 
 let currentStep = 0;
 let selectedComponents = {};
 
+// ============================================================
+// RENDERIZAR ETAPA ACTUAL
+// ============================================================
+
 function renderStep() {
   const step = builderSteps[currentStep];
+
   document.getElementById('stepTitle').textContent = step.title;
-  document.getElementById('stepDesc').textContent  = step.desc;
+  document.getElementById('stepDesc').textContent = step.desc;
   document.getElementById('prevStep').disabled = currentStep === 0;
-  document.getElementById('nextStep').textContent =
-    currentStep === builderSteps.length - 1 ? 'Finalizar' : 'Siguiente ';
-  if (currentStep < builderSteps.length - 1) {
-    document.getElementById('nextStep').innerHTML = 'Siguiente <i class="fa fa-arrow-right"></i>';
+
+  const nextButton = document.getElementById('nextStep');
+
+  if (currentStep === builderSteps.length - 1) {
+    nextButton.textContent = 'Ver resumen';
+  } else {
+    nextButton.innerHTML =
+      'Siguiente <i class="fa fa-arrow-right"></i>';
   }
 
-  // Update step indicators
-  document.querySelectorAll('.step-item').forEach((el, i) => {
-    el.classList.remove('active', 'done');
-    if (i < currentStep) el.classList.add('done');
-    if (i === currentStep) el.classList.add('active');
+  // Actualizar los indicadores de pasos.
+  document.querySelectorAll('.step-item').forEach((element, index) => {
+    element.classList.remove('active', 'done');
+
+    if (index < currentStep) {
+      element.classList.add('done');
+    }
+
+    if (index === currentStep) {
+      element.classList.add('active');
+    }
   });
 
   renderComponents(step.components);
 }
 
-function renderComponents(components) {
-  const search = document.getElementById('builderSearch').value.toLowerCase();
-  const sort   = document.getElementById('builderSort').value;
+// ============================================================
+// MOSTRAR COMPONENTES
+// ============================================================
 
-  let list = components.filter(c => c.name.toLowerCase().includes(search));
-  if (sort === 'price-asc')  list.sort((a,b) => a.price - b.price);
-  if (sort === 'price-desc') list.sort((a,b) => b.price - a.price);
+function renderComponents(components) {
+  const searchInput = document.getElementById('builderSearch');
+  const sortSelect = document.getElementById('builderSort');
+
+  const search = searchInput.value.toLowerCase().trim();
+  const sort = sortSelect.value;
+
+  let list = components.filter(component =>
+    component.name.toLowerCase().includes(search)
+  );
+
+  if (sort === 'price-asc') {
+    list.sort((a, b) => a.price - b.price);
+  }
+
+  if (sort === 'price-desc') {
+    list.sort((a, b) => b.price - a.price);
+  }
 
   const slot = builderSteps[currentStep].slot;
-  const el   = document.getElementById('componentsList');
-  el.innerHTML = list.map(c => `
-    <div class="component-item${selectedComponents[slot]?.id === c.id ? ' selected' : ''}"
-         onclick="selectComponent('${c.id}')">
-      <div class="component-img">${c.image ? `<img src="${c.image}" alt="${c.name}" loading="lazy" onerror="imgError(this)">` : '<span class="img-placeholder"><i class="fa fa-box-open"></i></span>'}</div>
-      <div class="component-info">
-        <h4>${c.name}</h4>
-        <p>${c.desc}</p>
-      </div>
-      <span class="component-price">$${c.price.toLocaleString('es-AR')}</span>
-      <div class="component-select-btn">
-        <i class="fa fa-${selectedComponents[slot]?.id === c.id ? 'check' : 'plus'}"></i>
-      </div>
-    </div>
-  `).join('');
+  const container = document.getElementById('componentsList');
+
+  if (!list.length) {
+    container.innerHTML =
+      '<p style="padding:2rem;color:var(--clr-muted)">No se encontraron componentes.</p>';
+    return;
+  }
+
+  container.innerHTML = list
+    .map(component => {
+      const isSelected =
+        selectedComponents[slot]?.id === component.id;
+
+      return `
+        <div
+          class="component-item${isSelected ? ' selected' : ''}"
+          onclick="selectComponent('${component.id}')"
+        >
+          <div class="component-img">
+            ${component.image
+          ? `
+                  <img
+                    src="${component.image}"
+                    alt="${component.name}"
+                    loading="lazy"
+                    onerror="imgError(this)"
+                  >
+                `
+          : `
+                  <span class="img-placeholder">
+                    <i class="fa fa-box-open"></i>
+                  </span>
+                `
+        }
+          </div>
+
+          <div class="component-info">
+            <h4>${component.name}</h4>
+            <p>${component.desc || ''}</p>
+          </div>
+
+          <span class="component-price">
+            $${component.price.toLocaleString('es-AR')}
+          </span>
+
+          <div class="component-select-btn">
+            <i class="fa fa-${isSelected ? 'check' : 'plus'}"></i>
+          </div>
+        </div>
+      `;
+    })
+    .join('');
 }
+
+// ============================================================
+// SELECCIONAR COMPONENTE
+// ============================================================
 
 function selectComponent(id) {
   const step = builderSteps[currentStep];
-  const comp = step.components.find(c => c.id === id);
-  if (!comp) return;
 
-  if (selectedComponents[step.slot]?.id === id) {
+  const component = step.components.find(item => item.id === id);
+
+  if (!component) {
+    return;
+  }
+
+  const alreadySelected =
+    selectedComponents[step.slot]?.id === id;
+
+  if (alreadySelected) {
     delete selectedComponents[step.slot];
   } else {
-    selectedComponents[step.slot] = comp;
+    selectedComponents[step.slot] = component;
   }
+
   renderComponents(step.components);
   renderSummary();
   checkCompatibility();
 }
 
-function renderSummary() {
-  const list = document.getElementById('summaryList');
-  const keys = Object.keys(selectedComponents);
-  const addBtn = document.getElementById('addBuildToCart');
+// Hacer disponible la función para el onclick del HTML generado.
+window.selectComponent = selectComponent;
 
-  if (!keys.length) {
-    list.innerHTML = '<p class="summary-empty">Aún no seleccionaste componentes</p>';
+// ============================================================
+// RESUMEN DE LA BUILD
+// ============================================================
+
+function renderSummary() {
+  const summaryList = document.getElementById('summaryList');
+  const selectedSlots = Object.keys(selectedComponents);
+  const addButton = document.getElementById('addBuildToCart');
+
+  if (!selectedSlots.length) {
+    summaryList.innerHTML =
+      '<p class="summary-empty">Aún no seleccionaste componentes</p>';
+
     document.getElementById('buildTotal').textContent = '$0';
-    addBtn.disabled = true;
+    addButton.disabled = true;
+
     return;
   }
 
-  const slotLabels = { cpu:'CPU', mobo:'Placa Madre', ram:'RAM', storage:'Almacenamiento', gpu:'GPU', psu:'Fuente', case:'Gabinete' };
-  let total = 0;
-  list.innerHTML = keys.map(slot => {
-    const c = selectedComponents[slot];
-    total += c.price;
-    return `<div class="summary-row">
-      <span>${slotLabels[slot]}: ${c.name.substring(0,24)}…</span>
-      <strong>$${c.price.toLocaleString('es-AR')}</strong>
-    </div>`;
-  }).join('');
+  const slotLabels = {
+    cpu: 'CPU',
+    mobo: 'Placa Madre',
+    ram: 'RAM',
+    storage: 'Almacenamiento',
+    gpu: 'GPU',
+    psu: 'Fuente',
+    case: 'Gabinete',
+  };
 
-  document.getElementById('buildTotal').textContent = '$' + total.toLocaleString('es-AR');
-  addBtn.disabled = keys.length < 3;
+  let total = 0;
+
+  summaryList.innerHTML = selectedSlots
+    .map(slot => {
+      const component = selectedComponents[slot];
+
+      total += component.price;
+
+      return `
+        <div class="summary-row">
+          <span>
+            ${slotLabels[slot]}:
+            ${component.name.substring(0, 24)}…
+          </span>
+
+          <strong>
+            $${component.price.toLocaleString('es-AR')}
+          </strong>
+        </div>
+      `;
+    })
+    .join('');
+
+  document.getElementById('buildTotal').textContent =
+    '$' + total.toLocaleString('es-AR');
+
+  // Se habilita cuando existen al menos tres componentes elegidos.
+  addButton.disabled = selectedSlots.length < 3;
 }
+
+// ============================================================
+// COMPATIBILIDAD
+// ============================================================
 
 function checkCompatibility() {
   const status = document.getElementById('compatStatus');
-  const cpu  = selectedComponents['cpu'];
-  const mobo = selectedComponents['mobo'];
-  const ram  = selectedComponents['ram'];
-  const mb   = selectedComponents['mobo'];
 
-  let ok = true;
-  let msg = '<i class="fa fa-check-circle"></i> Todos los componentes son compatibles';
+  const cpu = selectedComponents.cpu;
+  const motherboard = selectedComponents.mobo;
+  const ram = selectedComponents.ram;
 
-  if (cpu && mobo && cpu.socket !== mobo.socket) {
-    ok = false;
-    msg = `<i class="fa fa-exclamation-triangle"></i> CPU (${cpu.socket}) incompatible con Placa Madre (${mobo.socket})`;
-  } else if (ram && mb && mb.memType && ram.memType && ram.memType !== mb.memType) {
-    ok = false;
-    msg = `<i class="fa fa-exclamation-triangle"></i> RAM (${ram.memType}) incompatible con Placa Madre (${mb.memType})`;
+  let isCompatible = true;
+
+  let message =
+    '<i class="fa fa-check-circle"></i> Todos los componentes son compatibles';
+
+  if (
+    cpu &&
+    motherboard &&
+    cpu.socket &&
+    motherboard.socket &&
+    cpu.socket !== motherboard.socket
+  ) {
+    isCompatible = false;
+
+    message = `
+      <i class="fa fa-exclamation-triangle"></i>
+      CPU (${cpu.socket}) incompatible con Placa Madre (${motherboard.socket})
+    `;
+  } else if (
+    ram &&
+    motherboard &&
+    motherboard.memType &&
+    ram.memType &&
+    ram.memType !== motherboard.memType
+  ) {
+    isCompatible = false;
+
+    message = `
+      <i class="fa fa-exclamation-triangle"></i>
+      RAM (${ram.memType}) incompatible con Placa Madre (${motherboard.memType})
+    `;
   }
 
-  status.className = 'compatibility-status' + (ok ? '' : ' warning');
-  status.innerHTML = msg;
+  status.className =
+    'compatibility-status' +
+    (isCompatible ? '' : ' warning');
+
+  status.innerHTML = message;
 }
 
-// Navigation
-document.getElementById('prevStep')?.addEventListener('click', () => {
-  if (currentStep > 0) { currentStep--; renderStep(); }
-});
-document.getElementById('nextStep')?.addEventListener('click', () => {
-  if (currentStep < builderSteps.length - 1) { currentStep++; renderStep(); }
-  else {
-    showToast('¡Build guardado! Componentes agregados al carrito.');
-    Object.values(selectedComponents).forEach(c => {
-      cart.push({ ...c, qty: 1 });
-    });
-    saveCart();
+// ============================================================
+// CAMBIAR DE ETAPA
+// ============================================================
+
+function goToStep(stepIndex) {
+  currentStep = stepIndex;
+
+  // Limpiar la búsqueda de la etapa anterior.
+  const searchInput = document.getElementById('builderSearch');
+
+  if (searchInput) {
+    searchInput.value = '';
   }
-});
 
-document.getElementById('resetBuild')?.addEventListener('click', () => {
-  selectedComponents = {};
-  currentStep = 0;
+  // Reiniciar el ordenamiento.
+  const sortSelect = document.getElementById('builderSort');
+
+  if (sortSelect) {
+    sortSelect.value = 'default';
+  }
+
   renderStep();
-  renderSummary();
-});
 
-document.getElementById('addBuildToCart')?.addEventListener('click', () => {
-  Object.values(selectedComponents).forEach(c => {
-    const existing = cart.find(i => i.id === c.id);
-    if (existing) existing.qty++;
-    else cart.push({ ...c, qty: 1 });
+  // Llevar al usuario al inicio del selector.
+  document.querySelector('.builder-selector')?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start',
   });
-  saveCart();
-  showToast('Build completo agregado al carrito');
-});
+}
 
-document.getElementById('builderSearch')?.addEventListener('input', () => renderComponents(builderSteps[currentStep].components));
-document.getElementById('builderSort')?.addEventListener('change', () => renderComponents(builderSteps[currentStep].components));
+// ============================================================
+// BOTONES DE NAVEGACIÓN
+// ============================================================
 
-document.querySelectorAll('.step-item').forEach((el, i) => {
-  el.addEventListener('click', () => { currentStep = i; renderStep(); });
-});
+document
+  .getElementById('prevStep')
+  ?.addEventListener('click', () => {
+    if (currentStep > 0) {
+      goToStep(currentStep - 1);
+    }
+  });
 
-// ---------- Init: load components from Firestore, then render ----------
+document
+  .getElementById('nextStep')
+  ?.addEventListener('click', () => {
+    if (currentStep < builderSteps.length - 1) {
+      goToStep(currentStep + 1);
+      return;
+    }
+
+    // En la última etapa no se agrega nada al carrito.
+    // Solo se lleva al usuario al inicio para revisar el resumen.
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+
+    showToast(
+      '¡Build completado! Revisa el resumen y agrégalo al carrito.'
+    );
+  });
+
+// ============================================================
+// REINICIAR BUILD
+// ============================================================
+
+document
+  .getElementById('resetBuild')
+  ?.addEventListener('click', () => {
+    selectedComponents = {};
+
+    renderSummary();
+    checkCompatibility();
+    goToStep(0);
+  });
+
+// ============================================================
+// AGREGAR BUILD AL CARRITO
+// ============================================================
+
+document
+  .getElementById('addBuildToCart')
+  ?.addEventListener('click', () => {
+    Object.values(selectedComponents).forEach(component => {
+      const existing = cart.find(
+        item => item.id === component.id
+      );
+
+      if (existing) {
+        existing.qty++;
+      } else {
+        cart.push({
+          ...component,
+          qty: 1,
+        });
+      }
+    });
+
+    saveCart();
+    showToast('Build completo agregado al carrito');
+  });
+
+// ============================================================
+// BUSCADOR Y ORDENAMIENTO
+// ============================================================
+
+document
+  .getElementById('builderSearch')
+  ?.addEventListener('input', () => {
+    renderComponents(
+      builderSteps[currentStep].components
+    );
+  });
+
+document
+  .getElementById('builderSort')
+  ?.addEventListener('change', () => {
+    renderComponents(
+      builderSteps[currentStep].components
+    );
+  });
+
+// ============================================================
+// INDICADORES DE ETAPA
+// ============================================================
+
+document
+  .querySelectorAll('.step-item')
+  .forEach((element, index) => {
+    element.addEventListener('click', () => {
+      goToStep(index);
+    });
+  });
+
+// ============================================================
+// INICIALIZACIÓN
+// ============================================================
+
 EPC.load()
   .then(({ bySlot }) => {
-    builderSteps = stepMeta.map(m => ({ ...m, components: bySlot[m.slot] || [] }));
+    builderSteps = stepMeta.map(step => ({
+      ...step,
+      components: bySlot[step.slot] || [],
+    }));
+
     renderStep();
     renderSummary();
+    checkCompatibility();
   })
-  .catch(err => {
-    console.error('No se pudieron cargar los componentes desde Firebase:', err);
-    const el = document.getElementById('componentsList');
-    if (el) el.innerHTML = '<p style="padding:2rem;color:var(--clr-muted)">No se pudieron cargar los componentes.</p>';
+  .catch(error => {
+    console.error(
+      'No se pudieron cargar los componentes desde el backend:',
+      error
+    );
+
+    const container =
+      document.getElementById('componentsList');
+
+    if (container) {
+      container.innerHTML =
+        '<p style="padding:2rem;color:var(--clr-muted)">No se pudieron cargar los componentes.</p>';
+    }
   });
