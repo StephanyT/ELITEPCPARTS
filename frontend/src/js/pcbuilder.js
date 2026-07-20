@@ -203,6 +203,12 @@ function renderSummary() {
   const summaryList = document.getElementById('summaryList');
   const selectedSlots = Object.keys(selectedComponents);
   const addButton = document.getElementById('addBuildToCart');
+  const selectedCount = document.getElementById('selectedCount');
+
+  if (selectedCount) {
+    selectedCount.innerHTML =
+      `<strong>${selectedSlots.length} de ${builderSteps.length}</strong> componentes`;
+  }
 
   if (!selectedSlots.length) {
     summaryList.innerHTML =
