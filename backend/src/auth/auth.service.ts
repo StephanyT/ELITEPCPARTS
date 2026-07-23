@@ -10,7 +10,7 @@ export class AuthService {
     @InjectRepository(Usuario)
     private usuariosRepository: Repository<Usuario>,
     private emailVerificationsService: EmailVerificationsService,
-  ) {}
+  ) { }
 
   async login(email: string, password: string) {
     const usuario = await this.usuariosRepository.findOneBy({ email });
