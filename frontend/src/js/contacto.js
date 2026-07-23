@@ -31,10 +31,27 @@ document.getElementById('contactForm')?.addEventListener('submit', e => {
   btn.disabled = true;
   btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Enviando...';
 
-  setTimeout(() => {
-    document.getElementById('contactForm').style.display = 'none';
-    document.getElementById('formSuccess').style.display = 'flex';
-  }, 1200);
+  fetch('http://localhost:3000/contacto', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      nombre:   document.getElementById('firstName').value.trim(),
+      apellido: document.getElementById('lastName').value.trim(),
+      email:    document.getElementById('email').value.trim(),
+      asunto:   document.getElementById('subject').value.trim(),
+      mensaje:  document.getElementById('message').value.trim(),
+    }),
+  })
+    .then(res => {
+      if (!res.ok) throw new Error('Error al enviar');
+      document.getElementById('contactForm').style.display = 'none';
+      document.getElementById('formSuccess').style.display = 'flex';
+    })
+    .catch(() => {
+      btn.disabled = false;
+      btn.innerHTML = 'Enviar mensaje';
+      alert('Hubo un error al enviar el mensaje. Intenta de nuevo.');
+    });
 });
 
 // FAQ accordion

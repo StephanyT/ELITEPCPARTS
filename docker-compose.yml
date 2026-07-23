@@ -9,6 +9,11 @@ services:
       - DB_USER=admin
       - DB_PASSWORD=secret
       - DB_NAME=elitepcparts
+      - MAIL_HOST=smtp.gmail.com
+      - MAIL_PORT=587
+      - MAIL_USER=${MAIL_USER}
+      - MAIL_PASS=${MAIL_PASS}
+      - MAIL_TO=${MAIL_TO}
     depends_on:
       - db
     healthcheck:
