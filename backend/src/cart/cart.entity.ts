@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Usuario } from '../usuarios/usuario.entity';
 import { Component } from '../components/component.entity';
 
@@ -8,9 +8,11 @@ export class Cart {
   id!: number;
 
   @ManyToOne(() => Usuario)
+  @JoinColumn({ name: 'usuario_id' })
   usuario!: Usuario;
 
   @ManyToOne(() => Component)
+  @JoinColumn({ name: 'component_id' })
   component!: Component;
 
   @Column()
