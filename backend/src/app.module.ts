@@ -7,6 +7,7 @@ import { OrderItem } from './order_items/order-item.entity';
 import { Cart } from './cart/cart.entity';
 import { Review } from './reviews/review.entity';
 import { EmailVerification } from './email_verifications/email-verification.entity';
+import { Contacto } from './contacto/contacto.entity';
 import { UsuariosModule } from './usuarios/usuarios.module';
 import { ComponentsModule } from './components/components.module';
 import { OrdersModule } from './orders/orders.module';
@@ -16,6 +17,7 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { EmailVerificationsModule } from './email_verifications/email_verification.module';
 import { LoggerMiddleware } from './logger.middleware';
 import { AuthModule } from './auth/auth.module';
+import { ContactoModule } from './contacto/contacto.module';
 
 @Module({
   imports: [
@@ -26,7 +28,7 @@ import { AuthModule } from './auth/auth.module';
       username: process.env.DB_USER || 'admin',
       password: process.env.DB_PASSWORD || 'secret',
       database: process.env.DB_NAME || 'elitepcparts',
-      entities: [Usuario, Component, Order, OrderItem, Cart, Review, EmailVerification],
+      entities: [Usuario, Component, Order, OrderItem, Cart, Review, EmailVerification, Contacto],
       synchronize: true,
     }),
     UsuariosModule,
@@ -37,6 +39,7 @@ import { AuthModule } from './auth/auth.module';
     ReviewsModule,
     EmailVerificationsModule,
     AuthModule,
+    ContactoModule,
   ],
 })
 export class AppModule {
