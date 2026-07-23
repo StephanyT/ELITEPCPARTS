@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Get, Query, Body } from '@nestjs/common';
 import { ApiTags, ApiBody } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { IsEmail, IsString } from 'class-validator';
@@ -20,5 +20,10 @@ export class AuthController {
   @ApiBody({ schema: { example: { email: 'test@test.com', password: '123456' } } })
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto.email, dto.password);
+  }
+
+  @Get('verificar')
+  verificar(@Query('token') token: string) {
+    return this.authService.verificarEmail(token);
   }
 }
