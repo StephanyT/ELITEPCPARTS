@@ -83,7 +83,13 @@ function renderOrders(orders) {
   const makeRow = o => {
     // Soporte para pedidos del backend (orderItems) y localStorage (productos string)
     const productos = o.orderItems
-      ? o.orderItems.map(i => `${i.cantidad}x ${i.component?.nombre || 'Producto'}`).join(', ')
+      ? o.orderItems.map(i => {
+          const nombre = i.component?.nombre || 'Producto';
+          const id = i.component?.id;
+          return id
+            ? `${i.cantidad}x <a href="producto.html?id=${id}" style="color:var(--clr-accent);text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${nombre}</a>`
+            : `${i.cantidad}x ${nombre}`;
+        }).join('<br>')
       : (o.productos || '');
     const fecha = o.creado_en
       ? new Date(o.creado_en).toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' })
@@ -93,7 +99,7 @@ function renderOrders(orders) {
       <tr>
         <td style="font-family:monospace;font-size:.85rem">${orderId}</td>
         <td>${fecha}</td>
-        <td style="font-size:.85rem;color:var(--clr-muted);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${productos}</td>
+        <td style="font-size:.85rem;color:var(--clr-muted);max-width:280px;line-height:1.5">${productos}</td>
         <td style="font-weight:600">S/ ${Number(o.total).toLocaleString('es-PE')}</td>
         <td>${estadoBadge(o.estado)}</td>
         <td></td>
