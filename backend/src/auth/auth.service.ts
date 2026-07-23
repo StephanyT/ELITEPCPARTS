@@ -29,7 +29,7 @@ export class AuthService {
   async verificarEmail(token: string) {
     const registro = await this.emailVerifRepository.findOne({
       where: { token, usado: false },
-      relations: ['usuario'],
+      relations: { usuario: true },
     });
     if (!registro) throw new BadRequestException('Token inválido o ya usado');
 
