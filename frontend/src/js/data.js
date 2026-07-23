@@ -3,7 +3,7 @@
 // ============================================================
 
 (function () {
-  const API_URL = 'http://localhost:3000/components';
+  const API_URL = (typeof BACKEND !== 'undefined' ? BACKEND : 'http://localhost:3000') + '/components';
 
   const CATEGORY_LABELS = {
     cpu: 'Procesadores',

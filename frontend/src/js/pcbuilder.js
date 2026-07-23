@@ -395,21 +395,23 @@ document
   .getElementById('addBuildToCart')
   ?.addEventListener('click', () => {
     Object.values(selectedComponents).forEach(component => {
-      const existing = cart.find(
-        item => item.id === component.id
-      );
+      const pId = String(component.id);
+      const existing = cart.find(item => String(item.id) === pId);
 
       if (existing) {
         existing.qty++;
+        saveCart();
+        if (existing.cartItemId) cartBackendUpdate(existing.cartItemId, existing.qty);
       } else {
-        cart.push({
-          ...component,
-          qty: 1,
+        const newItem = { ...component, id: pId, qty: 1 };
+        cart.push(newItem);
+        saveCart();
+        cartBackendAdd(pId, 1).then(res => {
+          if (res?.id) { newItem.cartItemId = res.id; saveCart(); }
         });
       }
     });
 
-    saveCart();
     showToast('Build completo agregado al carrito');
   });
 

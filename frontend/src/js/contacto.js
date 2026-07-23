@@ -31,7 +31,7 @@ document.getElementById('contactForm')?.addEventListener('submit', e => {
   btn.disabled = true;
   btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Enviando...';
 
-  fetch('http://localhost:3000/contacto', {
+  fetch(`${BACKEND}/contacto`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -44,12 +44,14 @@ document.getElementById('contactForm')?.addEventListener('submit', e => {
   })
     .then(res => {
       if (!res.ok) throw new Error('Error al enviar');
-      document.getElementById('contactForm').style.display = 'none';
+      // Ocultar campos del form pero mostrar el mensaje de éxito (que está dentro del form)
+      document.querySelectorAll('#contactForm .form-row, #contactForm .form-group, #contactForm button[type="submit"]')
+        .forEach(el => el.style.display = 'none');
       document.getElementById('formSuccess').style.display = 'flex';
     })
     .catch(() => {
       btn.disabled = false;
-      btn.innerHTML = 'Enviar mensaje';
+      btn.innerHTML = '<i class="fa fa-paper-plane"></i> Enviar mensaje';
       alert('Hubo un error al enviar el mensaje. Intenta de nuevo.');
     });
 });
