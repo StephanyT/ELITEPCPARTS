@@ -199,8 +199,11 @@
 
       try {
         const nombre = `${firstName} ${lastName}`;
-        const usuario = await registerWithBackend(nombre, email, password);
-        loginSuccess(usuario);
+        await registerWithBackend(nombre, email, password);
+        document.getElementById('registerForm').style.display = 'none';
+        document.querySelector('.auth-divider')?.remove();
+        document.querySelector('.social-btns')?.remove();
+        showAlert('¡Cuenta creada! Revisa tu correo para verificar tu cuenta antes de iniciar sesión.', 'success');
       } catch (err) {
         btn.disabled = false;
         btn.innerHTML = 'Crear cuenta';

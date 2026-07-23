@@ -18,6 +18,7 @@ import { EmailVerificationsModule } from './email_verifications/email_verificati
 import { LoggerMiddleware } from './logger.middleware';
 import { AuthModule } from './auth/auth.module';
 import { ContactoModule } from './contacto/contacto.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { ContactoModule } from './contacto/contacto.module';
     EmailVerificationsModule,
     AuthModule,
     ContactoModule,
+    MailModule,
   ],
 })
 export class AppModule {

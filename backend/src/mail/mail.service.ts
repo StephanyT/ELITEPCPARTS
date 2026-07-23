@@ -21,7 +21,7 @@ export class MailService {
     const t = this.transporter();
     if (!t) return;
 
-    const link = `http://localhost:3000/auth/verificar?token=${token}`;
+    const link = `http://localhost/src/pages/verificado.html?token=${token}`;
 
     await t.sendMail({
       from: `"Elite PC Parts" <${process.env.MAIL_USER}>`,

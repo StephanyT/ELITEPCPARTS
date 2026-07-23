@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cuenta verificada — Elite PC Parts</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/auth.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    .verify-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 1.2rem;
+      padding: 2.5rem 2rem;
+    }
+    .verify-icon {
+      font-size: 4rem;
+      color: #22c55e;
+    }
+    .verify-card h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text, #f1f5f9);
+      margin: 0;
+    }
+    .verify-card p {
+      color: var(--text-muted, #94a3b8);
+      margin: 0;
+      font-size: 0.95rem;
+    }
+    .verify-card .btn {
+      margin-top: 0.5rem;
+      padding: 0.75rem 2rem;
+    }
+    .verify-error { color: #ef4444; }
+    .verify-error .verify-icon { color: #ef4444; }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="header__inner container">
+      <a href="../../index.html" class="header__logo">
+        <span class="logo-elite">ELITE</span><span class="logo-pc"> PC PARTS</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="auth-main">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <span class="logo-elite">ELITE</span><span class="logo-pc"> PC PARTS</span>
+      </div>
+
+      <div class="verify-card" id="verifyContent">
+        <i class="fa fa-spinner fa-spin verify-icon" style="color:#6366f1"></i>
+        <h1>Verificando tu cuenta...</h1>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const token  = params.get('token');
+    const card   = document.getElementById('verifyContent');
+
+    if (!token) {
+      card.innerHTML = `
+        <i class="fa fa-times-circle verify-icon verify-error"></i>
+        <h1>Token inválido</h1>
+        <p>El enlace de verificación no es válido.</p>
+        <a href="registro.html" class="btn btn--primary">Crear cuenta</a>
+      `;
+    } else {
+      fetch(`http://localhost:3000/auth/verificar?token=${token}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.mensaje && data.mensaje.includes('verificada')) {
+            card.innerHTML = `
+              <i class="fa fa-check-circle verify-icon"></i>
+              <h1>¡Cuenta verificada!</h1>
+              <p>Tu cuenta ha sido activada correctamente. Ya puedes iniciar sesión.</p>
+              <a href="login.html" class="btn btn--primary">Iniciar sesión</a>
+            `;
+          } else {
+            throw new Error('Token inválido');
+          }
+        })
+        .catch(() => {
+          card.innerHTML = `
+            <i class="fa fa-times-circle verify-icon" style="color:#ef4444"></i>
+            <h1>Enlace inválido o expirado</h1>
+            <p>El enlace ya fue usado o no es válido. Intenta registrarte de nuevo.</p>
+            <a href="registro.html" class="btn btn--primary">Volver al registro</a>
+          `;
+        });
+    }
+  </script>
+
+</body>
+</html>
