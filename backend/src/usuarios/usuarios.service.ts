@@ -2,18 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Usuario } from './usuario.entity';
-import { EmailVerification } from '../email_verifications/email-verification.entity';
-import { MailService } from '../mail/mail.service';
-import { randomUUID } from 'crypto';
+import { EmailVerificationsService } from '../email_verifications/email_verification.service';
 
 @Injectable()
 export class UsuariosService {
   constructor(
     @InjectRepository(Usuario)
     private usuariosRepository: Repository<Usuario>,
-    @InjectRepository(EmailVerification)
-    private emailVerifRepository: Repository<EmailVerification>,
-    private mailService: MailService,
+    private emailVerificationsService: EmailVerificationsService,
   ) {}
 
   findAll() {
@@ -28,9 +24,7 @@ export class UsuariosService {
     const usuario = this.usuariosRepository.create({ ...data, verificado: false });
     const guardado = await this.usuariosRepository.save(usuario);
 
-    const token = randomUUID();
-    await this.emailVerifRepository.save({ usuario: guardado, token, usado: false });
-    await this.mailService.sendVerification(guardado.email, guardado.nombre, token);
+    await this.emailVerificationsService.createAndSend(guardado);
 
     return { mensaje: 'Usuario creado. Revisa tu correo para verificar tu cuenta.' };
   }

@@ -1,9 +1,13 @@
-import { IsString, IsBoolean } from 'class-validator';
+import { IsString, IsBoolean, IsNumber, IsOptional } from 'class-validator';
 
 export class CreateEmailVerificationDto {
+  @IsNumber()
+  usuario_id!: number;
+
   @IsString()
   token!: string;
 
   @IsBoolean()
-  usado!: boolean;
+  @IsOptional()
+  usado?: boolean;
 }
