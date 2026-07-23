@@ -27,7 +27,7 @@ function buildFilters() {
     slider.value = maxPrice;
     slider.step = Math.max(1, Math.round(maxPrice / 100));
     const sliderVal = document.getElementById('priceSliderVal');
-    if (sliderVal) sliderVal.textContent = '$' + maxPrice.toLocaleString('es-AR');
+    if (sliderVal) sliderVal.textContent = 'S/' + maxPrice.toLocaleString('es-PE');
   }
 }
 
@@ -86,7 +86,7 @@ function render() {
           <span>(${p.reviews})</span>
         </div>
         <div class="product-card__footer">
-          <span class="product-card__price">$${p.price.toLocaleString('es-AR')}</span>
+          <span class="product-card__price">S/ ${p.price.toLocaleString('es-PE')}</span>
           <button class="product-card__add" onclick="event.stopPropagation();addToCart('${p.id}')">
             <i class="fa fa-plus"></i>
           </button>
@@ -123,7 +123,7 @@ function renderPagination() {
 const slider = document.getElementById('priceSlider');
 const sliderVal = document.getElementById('priceSliderVal');
 slider?.addEventListener('input', () => {
-  sliderVal.textContent = '$' + parseInt(slider.value).toLocaleString('es-AR');
+  sliderVal.textContent = 'S/' + parseInt(slider.value).toLocaleString('es-PE');
 });
 
 document.getElementById('applyFilters')?.addEventListener('click', applyFilters);
@@ -131,7 +131,7 @@ document.getElementById('clearFilters')?.addEventListener('click', () => {
   document.querySelectorAll('input[name="cat"]').forEach(c => c.checked = false);
   document.querySelectorAll('input[name="brand"]').forEach(b => b.checked = false);
   document.querySelector('input[name="rating"][value="0"]').checked = true;
-  if (slider) { slider.value = slider.max; sliderVal.textContent = '$' + parseInt(slider.max).toLocaleString('es-AR'); }
+  if (slider) { slider.value = slider.max; sliderVal.textContent = 'S/' + parseInt(slider.max).toLocaleString('es-PE'); }
   document.getElementById('searchInput').value = '';
   applyFilters();
 });

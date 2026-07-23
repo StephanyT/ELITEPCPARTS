@@ -93,7 +93,7 @@ function starsHTML(rating) {
 }
 
 function formatPrice(n) {
-  return '$' + n.toLocaleString('es-AR');
+  return 'S/ ' + n.toLocaleString('es-PE');
 }
 
 // Reusable product thumbnail. Falls back to the box icon if the image fails to load.

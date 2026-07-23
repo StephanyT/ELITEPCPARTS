@@ -6,6 +6,7 @@ import { Order } from './orders/order.entity';
 import { OrderItem } from './order_items/order-item.entity';
 import { Cart } from './cart/cart.entity';
 import { Review } from './reviews/review.entity';
+import { Wishlist } from './wishlist/wishlist.entity';
 import { EmailVerification } from './email_verifications/email-verification.entity';
 import { Contacto } from './contacto/contacto.entity';
 import { UsuariosModule } from './usuarios/usuarios.module';
@@ -14,6 +15,7 @@ import { OrdersModule } from './orders/orders.module';
 import { OrderItemsModule } from './order_items/order_items.module';
 import { CartModule } from './cart/cart.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { WishlistModule } from './wishlist/wishlist.module';
 import { EmailVerificationsModule } from './email_verifications/email_verification.module';
 import { LoggerMiddleware } from './logger.middleware';
 import { AuthModule } from './auth/auth.module';
@@ -29,7 +31,7 @@ import { MailModule } from './mail/mail.module';
       username: process.env.DB_USER || 'admin',
       password: process.env.DB_PASSWORD || 'secret',
       database: process.env.DB_NAME || 'elitepcparts',
-      entities: [Usuario, Component, Order, OrderItem, Cart, Review, EmailVerification, Contacto],
+      entities: [Usuario, Component, Order, OrderItem, Cart, Review, Wishlist, EmailVerification, Contacto],
       synchronize: true,
     }),
     UsuariosModule,
@@ -38,6 +40,7 @@ import { MailModule } from './mail/mail.module';
     OrderItemsModule,
     CartModule,
     ReviewsModule,
+    WishlistModule,
     EmailVerificationsModule,
     AuthModule,
     ContactoModule,

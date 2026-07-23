@@ -83,21 +83,21 @@
             <div class="stat-card">
               <i class="fa fa-box"></i>
               <div>
-                <strong>12</strong>
+                <strong id="statPedidos">0</strong>
                 <span>Pedidos totales</span>
               </div>
             </div>
             <div class="stat-card">
               <i class="fa fa-truck"></i>
               <div>
-                <strong>2</strong>
+                <strong id="statEnCamino">0</strong>
                 <span>En camino</span>
               </div>
             </div>
             <div class="stat-card">
               <i class="fa fa-heart"></i>
               <div>
-                <strong>8</strong>
+                <strong id="statDeseados">0</strong>
                 <span>Deseados</span>
               </div>
             </div>
@@ -123,31 +123,8 @@
                   <th></th>
                 </tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td>#00142</td>
-                  <td>20/06/2024</td>
-                  <td>RTX 4070 Ti, Corsair 32GB</td>
-                  <td>$493.500</td>
-                  <td><span class="badge-status delivered">Entregado</span></td>
-                  <td><a href="#" class="link-more">Ver</a></td>
-                </tr>
-                <tr>
-                  <td>#00138</td>
-                  <td>05/06/2024</td>
-                  <td>i9-13900K, ASUS ROG B650</td>
-                  <td>$324.999</td>
-                  <td><span class="badge-status shipping">En camino</span></td>
-                  <td><a href="#" class="link-more">Ver</a></td>
-                </tr>
-                <tr>
-                  <td>#00121</td>
-                  <td>12/05/2024</td>
-                  <td>Samsung 980 Pro 1TB</td>
-                  <td>$54.000</td>
-                  <td><span class="badge-status delivered">Entregado</span></td>
-                  <td><a href="#" class="link-more">Ver</a></td>
-                </tr>
+              <tbody id="dashOrdersBody">
+                <tr><td colspan="6" style="padding:1.5rem;color:var(--clr-muted)">Todavía no tienes pedidos.</td></tr>
               </tbody>
             </table>
           </div>

@@ -20,7 +20,7 @@ document.getElementById('contactForm')?.addEventListener('submit', e => {
       valid = false;
     } else if (id === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value)) {
       input.classList.add('error');
-      if (err) err.textContent = 'Ingresá un email válido';
+      if (err) err.textContent = 'Ingresa un email válido';
       valid = false;
     }
   });

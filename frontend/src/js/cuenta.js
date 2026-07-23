@@ -2,31 +2,34 @@
 // MI CUENTA
 // ============================================================
 
-// Requiere sesión activa (verificado contra Firebase en auth.js)
+// Requiere sesión activa
 requireAuth();
+
+const BACKEND = 'http://localhost:3000';
 
 // Rellenar el sidebar/perfil con el usuario actual.
 function fillProfile(session) {
   if (!session) return;
-  const initials = ((session.firstName?.[0] || session.email?.[0] || 'U') +
-                    (session.lastName?.[0] || '')).toUpperCase();
+  const nombre = session.nombre || session.firstName || '';
+  const initials = (nombre[0] || session.email?.[0] || 'U').toUpperCase();
   const avatarEl = document.querySelector('.avatar');
   if (avatarEl) avatarEl.textContent = initials;
   const nameEl  = document.querySelector('.profile-name');
   const emailEl = document.querySelector('.profile-email');
-  if (nameEl)  nameEl.textContent  = ((session.firstName || '') + ' ' + (session.lastName || '')).trim() || 'Mi cuenta';
+  if (nameEl)  nameEl.textContent  = nombre || 'Mi cuenta';
   if (emailEl) emailEl.textContent = session.email || '';
 
   const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
-  set('pfFirst', session.firstName);
-  set('pfLast',  session.lastName);
+  set('pfFirst', nombre);
   set('pfEmail', session.email);
-  set('pfPhone', session.phone);
 }
 
-// Paint immediately from cache, then refine when Firebase confirms the user.
-fillProfile(getSession());
-EPCAuth.onUser(profile => { fillProfile(profile); loadOrders(profile.id); });
+// Cargar datos al iniciar
+const _session = getSession();
+fillProfile(_session);
+if (_session?.id) {
+  loadWishlist(_session.id);
+}
 
 // Logout
 document.querySelector('.account-nav__item.logout')?.addEventListener('click', e => {
@@ -53,90 +56,66 @@ if (location.hash) {
   link?.click();
 }
 
-// ---------- Orders from Firestore ----------
-async function loadOrders(uid) {
-  const body = document.getElementById('ordersBody');
-  if (!body || !window.db) return;
+// ---------- Wishlist desde backend ----------
+async function loadWishlist(usuarioId) {
+  const wishGrid = document.getElementById('wishlistGrid');
+  if (!wishGrid) return;
+
   try {
-    const doc = await db.collection('usuarios').doc(uid).get();
-    const orders = (doc.exists && Array.isArray(doc.data().pedidos)) ? doc.data().pedidos.slice().reverse() : [];
-    if (!orders.length) {
-      body.innerHTML = '<tr><td colspan="6" style="padding:1.5rem;color:var(--clr-muted)">Todavía no tenés pedidos.</td></tr>';
+    const res = await fetch(`${BACKEND}/wishlist/usuario/${usuarioId}`);
+    const items = await res.json();
+
+    // Actualizar stat de deseados
+    const statEl = document.getElementById('statDeseados');
+    if (statEl) statEl.textContent = items.length;
+
+    if (!items.length) {
+      wishGrid.innerHTML = '<p style="color:var(--clr-muted);grid-column:1/-1;padding:1rem 0">No tienes productos en tu lista de deseos.</p>';
       return;
     }
-    body.innerHTML = orders.map(o => `
-      <tr>
-        <td>${o.id}</td>
-        <td>${o.date}</td>
-        <td>${(o.summary || '').slice(0, 48)}${(o.summary || '').length > 48 ? '…' : ''}</td>
-        <td>$${(o.total || 0).toLocaleString('es-AR')}</td>
-        <td><span class="badge-status shipping">${o.status || 'Procesando'}</span></td>
-        <td></td>
-      </tr>
-    `).join('');
+
+    wishGrid.innerHTML = items.map(item => {
+      const c = item.component;
+      const precio = Number(c.precio).toLocaleString('es-PE');
+      return `
+        <article class="product-card">
+          <div style="position:relative">
+            <img src="${c.imagen_url}" alt="${c.nombre}" style="width:100%;height:180px;object-fit:contain;background:#f5f5f5;border-radius:8px 8px 0 0" onerror="this.style.display='none'">
+            <button class="wishlist-remove-btn" data-id="${item.id}" title="Quitar de deseados" style="position:absolute;top:8px;right:8px;background:#fff;border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.15)">
+              <i class="fa fa-times" style="color:#ef4444;font-size:.8rem"></i>
+            </button>
+          </div>
+          <div class="product-card__body" onclick="window.location='producto.html?id=${c.id}'" style="cursor:pointer">
+            <span class="product-card__cat">${c.categoria}</span>
+            <p class="product-card__name">${c.nombre}</p>
+            <div class="product-card__footer">
+              <span class="product-card__price">S/ ${precio}</span>
+              <button class="product-card__add" onclick="event.stopPropagation();addToCart('${c.id}')"><i class="fa fa-plus"></i></button>
+            </div>
+          </div>
+        </article>`;
+    }).join('');
+
+    // Botones de quitar
+    wishGrid.querySelectorAll('.wishlist-remove-btn').forEach(btn => {
+      btn.addEventListener('click', async e => {
+        e.stopPropagation();
+        const wishlistId = btn.dataset.id;
+        await fetch(`${BACKEND}/wishlist/${wishlistId}`, { method: 'DELETE' });
+        loadWishlist(usuarioId);
+        showToast('Eliminado de deseados');
+      });
+    });
+
   } catch (e) {
-    console.error('No se pudieron cargar los pedidos:', e);
+    if (wishGrid) wishGrid.innerHTML = '<p style="color:var(--clr-muted)">No se pudo cargar tu lista de deseos.</p>';
   }
 }
 
-// ---------- Wishlist (from Firestore catalog) ----------
-if (window.EPC) {
-  EPC.load().then(data => {
-    products = data.products;
-    const wishGrid = document.getElementById('wishlistGrid');
-    if (!wishGrid) return;
-    wishGrid.innerHTML = data.products.slice(2, 6).map(p => `
-      <article class="product-card" onclick="window.location='producto.html?id=${p.id}'">
-        ${productImg(p)}
-        <div class="product-card__body">
-          <span class="product-card__cat">${p.category}</span>
-          <p class="product-card__name">${p.name}</p>
-          <div class="product-card__stars">${starsHTML(p.rating)} <span>(${p.reviews})</span></div>
-          <div class="product-card__footer">
-            <span class="product-card__price">$${p.price.toLocaleString('es-AR')}</span>
-            <button class="product-card__add" onclick="event.stopPropagation();addToCart('${p.id}')"><i class="fa fa-plus"></i></button>
-          </div>
-        </div>
-      </article>
-    `).join('');
-  }).catch(() => {});
-}
-
-// ---------- Profile form: save name/phone + optional password change ----------
+// ---------- Profile form (placeholder — actualización de nombre próximamente) ----------
 document.getElementById('profileForm')?.addEventListener('submit', async e => {
   e.preventDefault();
-  if (!EPCAuth.uid) { showToast('Iniciá sesión para guardar cambios'); return; }
-
-  const firstName = document.getElementById('pfFirst').value.trim();
-  const lastName  = document.getElementById('pfLast').value.trim();
-  const phone     = document.getElementById('pfPhone').value.trim();
-  const pass      = document.getElementById('pfPass').value;
-  const pass2     = document.getElementById('pfPass2').value;
-
-  if (pass && pass.length < 6)   { showToast('La contraseña debe tener al menos 6 caracteres'); return; }
-  if (pass && pass !== pass2)    { showToast('Las contraseñas no coinciden'); return; }
-
-  try {
-    await db.collection('usuarios').doc(EPCAuth.uid).set({ firstName, lastName, phone }, { merge: true });
-    if (auth.currentUser) await auth.currentUser.updateProfile({ displayName: `${firstName} ${lastName}`.trim() });
-    if (pass && auth.currentUser) await auth.currentUser.updatePassword(pass);
-
-    const profile = { ...EPCAuth.profile, firstName, lastName, phone };
-    EPCAuth.profile = profile;
-    cacheSession(profile);
-    updateHeaderAuth(profile);
-    fillProfile(profile);
-    document.getElementById('pfPass').value = '';
-    document.getElementById('pfPass2').value = '';
-    showToast('Cambios guardados correctamente');
-  } catch (err) {
-    if (err.code === 'auth/requires-recent-login') {
-      showToast('Por seguridad, volvé a iniciar sesión para cambiar la contraseña');
-    } else {
-      showToast('No se pudieron guardar los cambios');
-    }
-    console.error('profile save', err);
-  }
+  showToast('Perfil guardado (próximamente)');
 });
 
 // Add address (placeholder)

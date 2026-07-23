@@ -18,7 +18,7 @@ const stepMeta = [
   {
     slot: 'ram',
     title: 'Seleccioná Memoria RAM',
-    desc: 'La RAM determina cuántos programas podés tener abiertos simultáneamente.',
+    desc: 'La RAM determina cuántos programas puedes tener abiertos simultáneamente.',
   },
   {
     slot: 'storage',
@@ -153,7 +153,7 @@ function renderComponents(components) {
           </div>
 
           <span class="component-price">
-            $${component.price.toLocaleString('es-AR')}
+            S/ ${component.price.toLocaleString('es-PE')}
           </span>
 
           <div class="component-select-btn">
@@ -246,7 +246,7 @@ function renderSummary() {
           </span>
 
           <strong>
-            $${component.price.toLocaleString('es-AR')}
+            S/ ${component.price.toLocaleString('es-PE')}
           </strong>
         </div>
       `;
@@ -254,7 +254,7 @@ function renderSummary() {
     .join('');
 
   document.getElementById('buildTotal').textContent =
-    '$' + total.toLocaleString('es-AR');
+    'S/' + total.toLocaleString('es-PE');
 
   // Se habilita cuando existen al menos tres componentes elegidos.
   addButton.disabled = selectedSlots.length < 3;

@@ -28,7 +28,7 @@ function renderCart() {
       <div class="cart-item__info">
         <span class="cart-item__cat">${item.category || 'Componente'}</span>
         <p class="cart-item__name">${item.name}</p>
-        <p class="cart-item__price">$${item.price.toLocaleString('es-AR')} c/u</p>
+        <p class="cart-item__price">S/ ${item.price.toLocaleString('es-PE')} c/u</p>
       </div>
       <div class="cart-item__controls">
         <div class="qty-control">
@@ -36,7 +36,7 @@ function renderCart() {
           <span>${item.qty}</span>
           <button onclick="changeQty('${item.id}', 1)"><i class="fa fa-plus"></i></button>
         </div>
-        <span class="cart-item__subtotal">$${(item.price * item.qty).toLocaleString('es-AR')}</span>
+        <span class="cart-item__subtotal">S/ ${(item.price * item.qty).toLocaleString('es-PE')}</span>
         <button class="cart-item__remove" onclick="removeItem('${item.id}')" title="Eliminar">
           <i class="fa fa-trash"></i>
         </button>
@@ -54,11 +54,11 @@ function renderSummary() {
   const total = subtotal - discountAmt + shipping;
 
   document.getElementById('summaryRows').innerHTML = `
-    <div class="summary-row-line"><span>Subtotal (${cart.reduce((s,i)=>s+i.qty,0)} productos)</span><strong>$${subtotal.toLocaleString('es-AR')}</strong></div>
-    ${discount ? `<div class="summary-row-line"><span>Descuento aplicado</span><strong style="color:#22c55e">-$${discountAmt.toLocaleString('es-AR')}</strong></div>` : ''}
-    <div class="summary-row-line"><span>Envío</span><strong>${shipping === 0 ? 'GRATIS' : '$'+shipping.toLocaleString('es-AR')}</strong></div>
+    <div class="summary-row-line"><span>Subtotal (${cart.reduce((s,i)=>s+i.qty,0)} productos)</span><strong>S/ ${subtotal.toLocaleString('es-PE')}</strong></div>
+    ${discount ? `<div class="summary-row-line"><span>Descuento aplicado</span><strong style="color:#22c55e">-S/ ${discountAmt.toLocaleString('es-PE')}</strong></div>` : ''}
+    <div class="summary-row-line"><span>Envío</span><strong>${shipping === 0 ? 'GRATIS' : 'S/'+shipping.toLocaleString('es-PE')}</strong></div>
   `;
-  document.getElementById('cartTotal').textContent = '$' + total.toLocaleString('es-AR');
+  document.getElementById('cartTotal').textContent = 'S/' + total.toLocaleString('es-PE');
 }
 
 function changeQty(id, delta) {
@@ -107,7 +107,7 @@ document.getElementById('applyCoupon')?.addEventListener('click', () => {
 document.getElementById('checkoutBtn')?.addEventListener('click', () => {
   if (!cart.length) return;
   if (!window.EPCAuth || !EPCAuth.uid) {
-    showToast('Iniciá sesión para finalizar tu compra');
+    showToast('Inicia sesión para finalizar tu compra');
     setTimeout(() => { location.href = 'login.html?redirect=carrito.html'; }, 1000);
     return;
   }
@@ -122,7 +122,7 @@ async function placeOrder() {
 
   const order = {
     id:      '#' + String(Date.now()).slice(-6),
-    date:    new Date().toLocaleDateString('es-AR'),
+    date:    new Date().toLocaleDateString('es-PE'),
     items:   cart.map(i => ({ id: i.id, name: i.name, qty: i.qty, price: i.price })),
     summary: cart.map(i => `${i.qty}x ${i.name}`).join(', '),
     total,
@@ -158,7 +158,7 @@ function renderSuggested() {
           <p class="product-card__name">${p.name}</p>
           <div class="product-card__stars">${starsHTML(p.rating)} <span>(${p.reviews})</span></div>
           <div class="product-card__footer">
-            <span class="product-card__price">$${p.price.toLocaleString('es-AR')}</span>
+            <span class="product-card__price">S/ ${p.price.toLocaleString('es-PE')}</span>
             <button class="product-card__add" onclick="event.stopPropagation();addToCart('${p.id}')"><i class="fa fa-plus"></i></button>
           </div>
         </div>
