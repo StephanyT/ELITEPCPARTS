@@ -13,6 +13,11 @@ export class OrdersController {
     return this.ordersService.findAll();
   }
 
+  @Get('usuario/:usuarioId')
+  findByUser(@Param('usuarioId') usuarioId: string) {
+    return this.ordersService.findByUser(+usuarioId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.ordersService.findOne(+id);

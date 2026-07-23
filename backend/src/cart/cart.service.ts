@@ -21,7 +21,7 @@ export class CartService {
 
     return this.cartRepository.find({
       where: { usuario: { id: usuarioId } },
-      relations: { usuario: true, component: true },
+      relations: { component: true },
     });
   }
 

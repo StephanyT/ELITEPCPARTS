@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout — Elite PC Parts</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/checkout.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+  <header class="header">
+    <div class="header__inner container">
+      <a href="../../index.html" class="header__logo"><span class="logo-elite">ELITE</span><span class="logo-pc"> PC PARTS</span></a>
+      <nav class="header__nav">
+        <a href="../../index.html">Inicio</a>
+        <a href="catalogo.html">Productos</a>
+        <a href="servicios.html">Servicios</a>
+        <a href="pcbuilder.html">PC Builder</a>
+        <a href="contacto.html">Contacto</a>
+      </nav>
+      <div class="header__actions">
+        <div class="search-bar">
+          <input type="text" placeholder="Buscar productos..." />
+          <button><i class="fa fa-search"></i></button>
+        </div>
+        <a href="cuenta.html" class="icon-btn"><i class="fa fa-user"></i></a>
+        <a href="carrito.html" class="icon-btn cart-btn"><i class="fa fa-shopping-cart"></i><span class="cart-badge">0</span></a>
+      </div>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+    <nav class="mobile-nav" id="mobileNav">
+      <a href="../../index.html">Inicio</a><a href="catalogo.html">Productos</a>
+      <a href="servicios.html">Servicios</a><a href="pcbuilder.html">PC Builder</a><a href="contacto.html">Contacto</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="checkout-page container">
+
+      <!-- PROGRESS BAR -->
+      <div class="checkout-progress">
+        <div class="progress-step active" data-step="1">
+          <div class="step-num"><span class="num-text">1</span></div>
+          <span>Envío</span>
+        </div>
+        <div class="progress-line" id="line1"></div>
+        <div class="progress-step" data-step="2">
+          <div class="step-num"><span class="num-text">2</span></div>
+          <span>Pago</span>
+        </div>
+        <div class="progress-line" id="line2"></div>
+        <div class="progress-step" data-step="3">
+          <div class="step-num"><span class="num-text">3</span></div>
+          <span>Confirmación</span>
+        </div>
+      </div>
+
+      <div class="checkout-layout">
+
+        <!-- FORMS -->
+        <div class="checkout-forms">
+
+          <!-- PASO 1: ENVÍO -->
+          <div class="checkout-step active" id="step1">
+            <div class="checkout-box">
+              <h3><i class="fa fa-truck"></i> Información de envío</h3>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Nombre *</label>
+                  <input type="text" id="shpNombre" placeholder="Juan" autocomplete="given-name" />
+                </div>
+                <div class="form-group">
+                  <label>Apellido *</label>
+                  <input type="text" id="shpApellido" placeholder="García" autocomplete="family-name" />
+                </div>
+                <div class="form-group">
+                  <label>Email *</label>
+                  <input type="email" id="shpEmail" placeholder="juan@email.com" autocomplete="email" />
+                </div>
+                <div class="form-group">
+                  <label>Teléfono</label>
+                  <input type="tel" id="shpTel" placeholder="+51 9 xxxx-xxxx" autocomplete="tel" />
+                </div>
+                <div class="form-group full">
+                  <label>Dirección *</label>
+                  <input type="text" id="shpDireccion" placeholder="Av. Javier Prado Este 1234, Dpto. 5B" autocomplete="street-address" />
+                </div>
+                <div class="form-group">
+                  <label>Ciudad *</label>
+                  <input type="text" id="shpCiudad" placeholder="Lima" autocomplete="address-level2" />
+                </div>
+                <div class="form-group">
+                  <label>Código postal</label>
+                  <input type="text" id="shpCp" placeholder="15001" autocomplete="postal-code" maxlength="10" />
+                </div>
+                <div class="form-group full">
+                  <label>País</label>
+                  <select id="shpPais" autocomplete="country">
+                    <option value="PE" selected>Perú</option>
+                    <option value="CO">Colombia</option>
+                    <option value="CL">Chile</option>
+                    <option value="MX">México</option>
+                    <option value="AR">Argentina</option>
+                    <option value="EC">Ecuador</option>
+                    <option value="BO">Bolivia</option>
+                  </select>
+                </div>
+              </div>
+              <p class="form-err" id="shpErr"><i class="fa fa-exclamation-circle"></i> Por favor completa los campos obligatorios.</p>
+            </div>
+            <button class="btn btn--primary" id="continueToPayment" style="width:100%;padding:.9rem;font-size:1rem">
+              Continuar al pago <i class="fa fa-arrow-right"></i>
+            </button>
+          </div>
+
+          <!-- PASO 2: PAGO -->
+          <div class="checkout-step" id="step2">
+
+            <div class="checkout-box pay-box">
+              <div class="pay-box__header">
+                <i class="fa fa-lock"></i> Pago seguro
+              </div>
+
+              <div class="pay-box__amount">
+                <span class="pay-box__label">Total a pagar</span>
+                <span class="pay-box__value" id="niubizAmount">S/ 0.00</span>
+              </div>
+
+              <div class="pay-box__cards">
+                <i class="fab fa-cc-visa"></i>
+                <i class="fab fa-cc-mastercard"></i>
+                <i class="fab fa-cc-amex"></i>
+                <i class="fab fa-cc-diners-club"></i>
+              </div>
+
+              <div class="pay-tip">
+                <i class="fa fa-flask"></i>
+                <span>Sandbox — tarjeta Visa: <code>4474 1183 5563 2240</code> &nbsp;·&nbsp; Vence: <code>03/28</code> &nbsp;·&nbsp; CVV: <code>111</code></span>
+              </div>
+
+              <p id="niubizErr" class="form-err" style="margin-bottom:.75rem"></p>
+
+              <!-- Niubiz SDK inyecta su botón aquí (se oculta, se hace clic automáticamente) -->
+              <form id="frmVisaNet" method="POST" action="" style="overflow:hidden;height:0"></form>
+
+              <button class="btn btn--primary" id="niubizPayBtn" style="width:100%;padding:.9rem;font-size:1.05rem;margin-top:1rem">
+                <i class="fa fa-lock"></i>&nbsp; Pagar &nbsp;<span id="payTotal"></span>
+              </button>
+
+              <div class="pay-box__security">
+                <span><i class="fa fa-shield-alt"></i> Verified by Visa</span>
+                <span><i class="fa fa-shield-alt"></i> Mastercard SecureCode</span>
+                <span><i class="fa fa-lock"></i> SSL 256-bit</span>
+              </div>
+            </div>
+
+            <button class="btn btn--ghost" id="backToShipping" style="width:100%;padding:.75rem;margin-top:.75rem;color:var(--clr-muted);border-color:var(--clr-border)">
+              <i class="fa fa-arrow-left"></i> Volver a información de envío
+            </button>
+          </div>
+
+          <!-- PASO 3: redirige a pago-resultado.html vía Niubiz -->
+
+        </div>
+
+        <!-- RESUMEN DE PEDIDO -->
+        <aside class="checkout-summary" id="orderSummary">
+          <h3><i class="fa fa-receipt"></i> Resumen del pedido</h3>
+          <div class="summary-items" id="summaryItems"></div>
+          <div class="summary-divider"></div>
+          <div class="summary-row"><span>Subtotal</span><span id="summarySubtotal">S/ 0</span></div>
+          <div class="summary-row"><span>Envío</span><span id="summaryShipping">S/ 45</span></div>
+          <div class="summary-row total"><span>Total</span><span id="summaryTotal">S/ 0</span></div>
+          <div class="summary-secure">
+            <i class="fa fa-shield-alt" style="color:#22c55e"></i>
+            Pago 100% seguro y encriptado
+          </div>
+        </aside>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner container">
+      <div class="footer__brand">
+        <p class="footer__logo"><span class="logo-elite">ELITE</span><span class="logo-pc"> PC PARTS</span></p>
+        <p>Tu tienda de confianza para armar la PC de tus sueños.</p>
+        <div class="footer__social">
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-facebook"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-youtube"></i></a>
+        </div>
+      </div>
+      <div class="footer__links">
+        <h4>Productos</h4>
+        <a href="catalogo.html?cat=Procesadores">Procesadores</a>
+        <a href="catalogo.html?cat=Placas+de+Video">Placas de video</a>
+        <a href="catalogo.html?cat=Memorias+RAM">Memorias</a>
+        <a href="catalogo.html?cat=Almacenamiento">Almacenamiento</a>
+      </div>
+      <div class="footer__links">
+        <h4>Servicios</h4>
+        <a href="servicios.html">Servicio técnico</a>
+        <a href="pcbuilder.html">PC Builder</a>
+        <a href="servicios.html">Envíos</a>
+        <a href="servicios.html">Garantía</a>
+      </div>
+      <div class="footer__links">
+        <h4>Contacto</h4>
+        <a href="contacto.html"><i class="fa fa-envelope"></i> contacto@elitepcparts.com</a>
+        <a href="contacto.html"><i class="fa fa-phone"></i> +51 1 234-5678</a>
+        <a href="contacto.html"><i class="fa fa-map-marker-alt"></i> San Isidro, Lima, Perú</a>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <p>&copy; 2026 Elite PC Parts. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="../js/firebase-init.js"></script>
+  <script src="../js/data.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/checkout.js"></script>
+</body>
+</html>

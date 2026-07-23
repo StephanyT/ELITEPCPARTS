@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, OneToMany } from 'typeorm';
 import { Usuario } from '../usuarios/usuario.entity';
+import { OrderItem } from '../order_items/order-item.entity';
 
 @Entity('orders')
 export class Order {
@@ -9,10 +10,13 @@ export class Order {
   @ManyToOne(() => Usuario)
   usuario!: Usuario;
 
+  @OneToMany(() => OrderItem, (item) => item.order, { cascade: true })
+  orderItems!: OrderItem[];
+
   @Column('decimal')
   total!: number;
 
-  @Column({ default: 'pendiente' })
+  @Column({ default: 'Procesando' })
   estado!: string;
 
   @CreateDateColumn()

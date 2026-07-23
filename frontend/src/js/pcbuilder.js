@@ -214,7 +214,7 @@ function renderSummary() {
     summaryList.innerHTML =
       '<p class="summary-empty">Aún no seleccionaste componentes</p>';
 
-    document.getElementById('buildTotal').textContent = '$0';
+    document.getElementById('buildTotal').textContent = 'S/ 0';
     addButton.disabled = true;
 
     return;

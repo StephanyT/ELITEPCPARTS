@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resultado del pago — Elite PC Parts</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/checkout.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    .result-page { max-width: 600px; margin: 4rem auto; padding: 0 1rem; text-align: center; }
+    .result-box  { background: var(--clr-surface); border: 1px solid var(--clr-border); border-radius: 16px; padding: 3rem 2rem; }
+    .result-icon { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2rem; }
+    .result-icon.ok  { background: linear-gradient(135deg,#22c55e,#16a34a); color:#fff; animation: pulse-green 2s ease-out; }
+    .result-icon.err { background: linear-gradient(135deg,#ef4444,#dc2626); color:#fff; }
+    @keyframes pulse-green {
+      0%   { box-shadow: 0 0 0 0 rgba(34,197,94,.5); }
+      70%  { box-shadow: 0 0 0 24px rgba(34,197,94,0); }
+      100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+    }
+    .result-box h2 { margin-bottom: .5rem; }
+    .order-chip { display:inline-block; background:var(--clr-surface2); border:1px solid var(--clr-border); border-radius:8px; padding:.5rem 1.25rem; font-family:'Courier New',monospace; font-size:1.1rem; font-weight:700; color:var(--clr-primary); margin:.75rem 0 1.25rem; }
+    .result-detail { font-size:.9rem; color:var(--clr-muted); margin-bottom:2rem; }
+    .result-actions { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; }
+    .card-info { display:inline-flex; align-items:center; gap:.5rem; background:var(--clr-surface2); border-radius:6px; padding:.35rem .75rem; font-size:.85rem; margin:.5rem 0; }
+    .niubiz-small { font-size:.75rem; color:var(--clr-muted); margin-top:1.5rem; display:flex; align-items:center; justify-content:center; gap:.35rem; }
+    .niubiz-small strong { color:#0066CC; }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="header__inner container">
+      <a href="../../index.html" class="header__logo"><span class="logo-elite">ELITE</span><span class="logo-pc"> PC PARTS</span></a>
+      <nav class="header__nav">
+        <a href="../../index.html">Inicio</a>
+        <a href="catalogo.html">Productos</a>
+        <a href="servicios.html">Servicios</a>
+        <a href="pcbuilder.html">PC Builder</a>
+        <a href="contacto.html">Contacto</a>
+      </nav>
+      <div class="header__actions">
+        <a href="cuenta.html" class="icon-btn"><i class="fa fa-user"></i></a>
+        <a href="carrito.html" class="icon-btn cart-btn"><i class="fa fa-shopping-cart"></i><span class="cart-badge">0</span></a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="result-page container">
+      <div class="result-box" id="resultBox">
+        <div class="result-icon" id="resultIcon"><i class="fa fa-spinner fa-spin"></i></div>
+        <h2 id="resultTitle">Procesando pago...</h2>
+        <p id="resultMsg" class="result-detail">Por favor espera mientras verificamos tu transacción.</p>
+        <div id="resultActions" class="result-actions"></div>
+        <div class="niubiz-small">Procesado por <strong>niubiz</strong> &nbsp;·&nbsp; <i class="fa fa-lock"></i> Pago seguro SSL</div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../js/firebase-init.js"></script>
+  <script src="../js/data.js"></script>
+  <script src="../js/main.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/pago-resultado.js"></script>
+</body>
+</html>

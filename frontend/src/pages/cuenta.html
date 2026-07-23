@@ -104,7 +104,7 @@
             <div class="stat-card">
               <i class="fa fa-tools"></i>
               <div>
-                <strong>3</strong>
+                <strong>0</strong>
                 <span>Builds guardados</span>
               </div>
             </div>
@@ -146,26 +146,7 @@
                 </tr>
               </thead>
               <tbody id="ordersBody">
-                <tr>
-                  <td>#00142</td><td>20/06/2024</td><td>RTX 4070 Ti, Corsair 32GB</td>
-                  <td>$493.500</td><td><span class="badge-status delivered">Entregado</span></td>
-                  <td><a href="#" class="link-more">Ver</a></td>
-                </tr>
-                <tr>
-                  <td>#00138</td><td>05/06/2024</td><td>i9-13900K, ASUS ROG B650</td>
-                  <td>$324.999</td><td><span class="badge-status shipping">En camino</span></td>
-                  <td><a href="#" class="link-more">Ver</a></td>
-                </tr>
-                <tr>
-                  <td>#00121</td><td>12/05/2024</td><td>Samsung 980 Pro 1TB</td>
-                  <td>$54.000</td><td><span class="badge-status delivered">Entregado</span></td>
-                  <td><a href="#" class="link-more">Ver</a></td>
-                </tr>
-                <tr>
-                  <td>#00110</td><td>01/04/2024</td><td>be quiet! Dark Rock Pro 4</td>
-                  <td>$38.000</td><td><span class="badge-status delivered">Entregado</span></td>
-                  <td><a href="#" class="link-more">Ver</a></td>
-                </tr>
+                <tr><td colspan="6" style="padding:1.5rem;color:var(--clr-muted)">Todavía no tienes pedidos.</td></tr>
               </tbody>
             </table>
           </div>
@@ -195,7 +176,7 @@
                 <li><i class="fa fa-plug"></i> Corsair RM850x 850W Gold</li>
               </ul>
               <div class="build-card__footer">
-                <strong>Total: $1.026.499</strong>
+                <strong>Total: S/ 10.264</strong>
                 <div class="build-actions">
                   <button class="btn btn--primary btn-sm">Agregar al carrito</button>
                   <button class="btn btn--outline btn-sm">Editar</button>
@@ -216,7 +197,7 @@
                 <li><i class="fa fa-plug"></i> EVGA 550W Bronze</li>
               </ul>
               <div class="build-card__footer">
-                <strong>Total: $285.000</strong>
+                <strong>Total: S/ 2.850</strong>
                 <div class="build-actions">
                   <button class="btn btn--primary btn-sm">Agregar al carrito</button>
                   <button class="btn btn--outline btn-sm">Editar</button>
@@ -246,12 +227,12 @@
             </div>
             <div class="form-group">
               <label>Teléfono</label>
-              <input type="tel" id="pfPhone" placeholder="+54 11 xxxx-xxxx" />
+              <input type="tel" id="pfPhone" placeholder="+51 1 xxxx-xxxx" />
             </div>
             <div class="form-row">
               <div class="form-group">
                 <label>Nueva contraseña</label>
-                <input type="password" id="pfPass" placeholder="Dejá en blanco para no cambiarla" />
+                <input type="password" id="pfPass" placeholder="Deja en blanco para no cambiarla" />
               </div>
               <div class="form-group">
                 <label>Confirmar contraseña</label>
@@ -269,10 +250,10 @@
             <div class="address-card default">
               <div class="address-card__badge">Principal</div>
               <p><strong>Usuario Demo</strong></p>
-              <p>Av. Corrientes 1234, Piso 5, Dto B</p>
-              <p>CABA, Buenos Aires, CP 1043</p>
-              <p>Argentina</p>
-              <p><i class="fa fa-phone"></i> +54 11 1234-5678</p>
+              <p>Av. Javier Prado Este 4200, Piso 5, Dpto B</p>
+              <p>San Isidro, Lima, CP 27</p>
+              <p>Perú</p>
+              <p><i class="fa fa-phone"></i> +51 1 234-5678</p>
               <div class="address-actions">
                 <button class="btn btn--outline btn-sm">Editar</button>
                 <button class="btn btn--outline btn-sm danger">Eliminar</button>
@@ -288,17 +269,42 @@
     </div>
   </main>
 
-  <footer class="footer">
+    <footer class="footer">
     <div class="footer__inner container">
       <div class="footer__brand">
         <p class="footer__logo"><span class="logo-elite">ELITE</span><span class="logo-pc"> PC PARTS</span></p>
         <p>Tu tienda de confianza para armar la PC de tus sueños.</p>
+        <div class="footer__social">
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-facebook"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-youtube"></i></a>
+        </div>
       </div>
-      <div class="footer__links"><h4>Productos</h4><a href="catalogo.html">Ver catálogo</a></div>
-      <div class="footer__links"><h4>Servicios</h4><a href="servicios.html">Servicio técnico</a></div>
-      <div class="footer__links"><h4>Contacto</h4><a href="contacto.html">Contactanos</a></div>
+      <div class="footer__links">
+        <h4>Productos</h4>
+        <a href="catalogo.html?cat=Procesadores">Procesadores</a>
+        <a href="catalogo.html?cat=Placas+de+Video">Placas de video</a>
+        <a href="catalogo.html?cat=Memorias+RAM">Memorias</a>
+        <a href="catalogo.html?cat=Almacenamiento">Almacenamiento</a>
+      </div>
+      <div class="footer__links">
+        <h4>Servicios</h4>
+        <a href="servicios.html">Servicio técnico</a>
+        <a href="pcbuilder.html">PC Builder</a>
+        <a href="servicios.html">Envíos</a>
+        <a href="servicios.html">Garantía</a>
+      </div>
+      <div class="footer__links">
+        <h4>Contacto</h4>
+        <a href="contacto.html"><i class="fa fa-envelope"></i> contacto@elitepcparts.com</a>
+        <a href="contacto.html"><i class="fa fa-phone"></i> +51 1 234-5678</a>
+        <a href="contacto.html"><i class="fa fa-map-marker-alt"></i> San Isidro, Lima, Perú</a>
+      </div>
     </div>
-    <div class="footer__bottom"><p>&copy; 2024 Elite PC Parts. Todos los derechos reservados.</p></div>
+    <div class="footer__bottom">
+      <p>&copy; 2026 Elite PC Parts. Todos los derechos reservados.</p>
+    </div>
   </footer>
   <script src="../js/firebase-init.js"></script>
   <script src="../js/data.js"></script>

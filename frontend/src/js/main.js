@@ -21,10 +21,45 @@ let cart = JSON.parse(localStorage.getItem('epc_cart') || '[]');
 function saveCart() {
   localStorage.setItem('epc_cart', JSON.stringify(cart));
   updateCartBadge();
-  // Mirror the cart to Firestore whenever a user is logged in (see auth.js).
-  if (window.EPCAuth && EPCAuth.uid && window.db) {
-    db.collection('usuarios').doc(EPCAuth.uid).set({ cart }, { merge: true }).catch(() => {});
-  }
+}
+
+// ---------- Cart ↔ Backend sync helpers ----------
+function cartBackendAdd(componentId, cantidad) {
+  const s = typeof getSession === 'function' ? getSession() : null;
+  if (!s?.id) return Promise.resolve(null);
+  return fetch(`${BACKEND}/cart`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'usuario-id': String(s.id) },
+    body: JSON.stringify({ component_id: parseInt(componentId), cantidad }),
+  }).then(r => r.ok ? r.json() : null).catch(() => null);
+}
+
+function cartBackendUpdate(cartItemId, cantidad) {
+  const s = typeof getSession === 'function' ? getSession() : null;
+  if (!s?.id || !cartItemId) return;
+  fetch(`${BACKEND}/cart/${cartItemId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', 'usuario-id': String(s.id) },
+    body: JSON.stringify({ cantidad }),
+  }).catch(() => {});
+}
+
+function cartBackendRemove(cartItemId) {
+  const s = typeof getSession === 'function' ? getSession() : null;
+  if (!s?.id || !cartItemId) return;
+  fetch(`${BACKEND}/cart/${cartItemId}`, {
+    method: 'DELETE',
+    headers: { 'usuario-id': String(s.id) },
+  }).catch(() => {});
+}
+
+function cartBackendClear() {
+  const s = typeof getSession === 'function' ? getSession() : null;
+  if (!s?.id) return;
+  fetch(`${BACKEND}/cart`, {
+    method: 'DELETE',
+    headers: { 'usuario-id': String(s.id) },
+  }).catch(() => {});
 }
 
 function updateCartBadge() {
@@ -36,15 +71,22 @@ function updateCartBadge() {
 }
 
 function addToCart(productId) {
-  const product = products.find(p => p.id === productId);
+  const pId = String(productId);
+  const product = products.find(p => String(p.id) === pId);
   if (!product) return;
-  const existing = cart.find(i => i.id === productId);
+  const existing = cart.find(i => String(i.id) === pId);
   if (existing) {
     existing.qty++;
+    saveCart();
+    if (existing.cartItemId) cartBackendUpdate(existing.cartItemId, existing.qty);
   } else {
-    cart.push({ ...product, qty: 1 });
+    const newItem = { ...product, id: pId, qty: 1 };
+    cart.push(newItem);
+    saveCart();
+    cartBackendAdd(pId, 1).then(res => {
+      if (res?.id) { newItem.cartItemId = res.id; saveCart(); }
+    });
   }
-  saveCart();
   showToast(`${product.name} agregado al carrito`);
 }
 

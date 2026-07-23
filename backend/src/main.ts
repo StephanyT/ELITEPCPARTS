@@ -6,7 +6,7 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({ skipMissingProperties: true }));
 
   const config = new DocumentBuilder()
     .setTitle('Elite PC Parts API')

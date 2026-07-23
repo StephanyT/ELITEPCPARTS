@@ -2,7 +2,6 @@
 // PRODUCTO DETALLE
 // ============================================================
 
-const BACKEND = 'http://localhost:3000';
 let qty = 1;
 let currentProduct = null;
 let selectedStars = 0;
@@ -17,10 +16,20 @@ document.getElementById('qtyPlus')?.addEventListener('click', () => {
 
 document.getElementById('addToCartBtn')?.addEventListener('click', () => {
   if (!currentProduct) return;
-  const existing = cart.find(i => i.id === currentProduct.id);
-  if (existing) existing.qty += qty;
-  else cart.push({ ...currentProduct, qty });
-  saveCart();
+  const pId = String(currentProduct.id);
+  const existing = cart.find(i => String(i.id) === pId);
+  if (existing) {
+    existing.qty += qty;
+    saveCart();
+    if (existing.cartItemId) cartBackendUpdate(existing.cartItemId, existing.qty);
+  } else {
+    const newItem = { ...currentProduct, id: pId, qty };
+    cart.push(newItem);
+    saveCart();
+    cartBackendAdd(pId, qty).then(res => {
+      if (res?.id) { newItem.cartItemId = res.id; saveCart(); }
+    });
+  }
   showToast(`${qty}x ${currentProduct.name} agregado al carrito`);
 });
 

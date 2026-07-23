@@ -50,7 +50,7 @@ function renderCart() {
 function renderSummary() {
   const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
   const discountAmt = Math.round(subtotal * discount);
-  const shipping = subtotal >= 50000 ? 0 : 4500;
+  const shipping = subtotal >= 500 ? 0 : 45;
   const total = subtotal - discountAmt + shipping;
 
   document.getElementById('summaryRows').innerHTML = `
@@ -62,19 +62,25 @@ function renderSummary() {
 }
 
 function changeQty(id, delta) {
-  const item = cart.find(i => i.id === id);
+  const sId = String(id);
+  const item = cart.find(i => String(i.id) === sId);
   if (!item) return;
   item.qty += delta;
   if (item.qty <= 0) { removeItem(id); return; }
   saveCart();
   renderCart();
+  if (item.cartItemId) cartBackendUpdate(item.cartItemId, item.qty);
 }
 
 function removeItem(id) {
-  cart = cart.filter(i => i.id !== id);
+  const sId = String(id);
+  const item = cart.find(i => String(i.id) === sId);
+  const cid = item?.cartItemId;
+  cart = cart.filter(i => String(i.id) !== sId);
   saveCart();
   renderCart();
   showToast('Producto eliminado del carrito');
+  if (cid) cartBackendRemove(cid);
 }
 
 function emptyCart() {
@@ -82,9 +88,10 @@ function emptyCart() {
   if (!confirm('¿Vaciar todo el carrito?')) return;
   cart = [];
   discount = 0;
-  saveCart();        // mirrors the empty cart to Firestore when logged in
+  saveCart();
   renderCart();
   showToast('Carrito vaciado');
+  cartBackendClear();
 }
 
 document.getElementById('clearCartBtn')?.addEventListener('click', emptyCart);
@@ -103,46 +110,17 @@ document.getElementById('applyCoupon')?.addEventListener('click', () => {
   }
 });
 
-// Checkout: requires login, then records the order in Firestore and clears the cart.
+// Checkout: requiere sesión activa → redirige a la página de checkout
 document.getElementById('checkoutBtn')?.addEventListener('click', () => {
   if (!cart.length) return;
-  if (!window.EPCAuth || !EPCAuth.uid) {
+  const session = getSession();
+  if (!session) {
     showToast('Inicia sesión para finalizar tu compra');
     setTimeout(() => { location.href = 'login.html?redirect=carrito.html'; }, 1000);
     return;
   }
-  placeOrder();
+  location.href = 'checkout.html';
 });
-
-async function placeOrder() {
-  const subtotal    = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  const discountAmt = Math.round(subtotal * discount);
-  const shipping    = subtotal >= 50000 ? 0 : 4500;
-  const total       = subtotal - discountAmt + shipping;
-
-  const order = {
-    id:      '#' + String(Date.now()).slice(-6),
-    date:    new Date().toLocaleDateString('es-PE'),
-    items:   cart.map(i => ({ id: i.id, name: i.name, qty: i.qty, price: i.price })),
-    summary: cart.map(i => `${i.qty}x ${i.name}`).join(', '),
-    total,
-    status:  'Procesando',
-  };
-
-  try {
-    await db.collection('usuarios').doc(EPCAuth.uid).set({
-      pedidos: firebase.firestore.FieldValue.arrayUnion(order),
-      cart: [],
-    }, { merge: true });
-    cart = [];
-    saveCart();
-    renderCart();
-    showToast('¡Compra realizada! Pedido ' + order.id);
-  } catch (e) {
-    console.error('checkout', e);
-    showToast('No se pudo completar la compra. Intentá de nuevo.');
-  }
-}
 
 // Productos sugeridos (cargados desde Firestore)
 function renderSuggested() {
@@ -167,5 +145,39 @@ function renderSuggested() {
   }).catch(() => {});
 }
 
-renderSuggested();
-renderCart();
+// Cargar carrito desde backend al entrar a la página (si hay sesión activa)
+(async function initCart() {
+  const session = typeof getSession === 'function' ? getSession() : null;
+  if (session?.id) {
+    try {
+      const res = await fetch(`${BACKEND}/cart`, {
+        headers: { 'usuario-id': String(session.id) },
+      });
+      if (res.ok) {
+        const items = await res.json();
+        if (items.length) {
+          // Backend tiene ítems → usar esos y sincronizar localStorage
+          cart = items.map(item => ({
+            id: String(item.component.id),
+            cartItemId: item.id,
+            name: item.component.nombre,
+            price: Number(item.component.precio),
+            category: item.component.categoria,
+            qty: item.cantidad,
+            image: item.component.imagen_url,
+          }));
+          saveCart();
+        } else if (cart.length) {
+          // Backend vacío pero localStorage tiene ítems → sincronizar al backend
+          for (const item of cart) {
+            const r = await cartBackendAdd(item.id, item.qty);
+            if (r?.id) { item.cartItemId = r.id; }
+          }
+          saveCart();
+        }
+      }
+    } catch (e) { /* si falla el backend, usar localStorage */ }
+  }
+  renderCart();
+  renderSuggested();
+})();

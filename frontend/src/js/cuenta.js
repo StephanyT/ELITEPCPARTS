@@ -5,8 +5,6 @@
 // Requiere sesión activa
 requireAuth();
 
-const BACKEND = 'http://localhost:3000';
-
 // Rellenar el sidebar/perfil con el usuario actual.
 function fillProfile(session) {
   if (!session) return;
@@ -30,6 +28,7 @@ fillProfile(_session);
 if (_session?.id) {
   loadWishlist(_session.id);
 }
+loadOrders();
 
 // Logout
 document.querySelector('.account-nav__item.logout')?.addEventListener('click', e => {
@@ -54,6 +53,75 @@ document.querySelectorAll('.account-nav__item[data-tab]').forEach(item => {
 if (location.hash) {
   const link = document.querySelector(`.account-nav__item[data-tab="${location.hash.slice(1)}"]`);
   link?.click();
+}
+
+// ---------- Pedidos ----------
+const estadoBadge = estado => {
+  const map = {
+    'Procesando': 'background:#f59e0b;color:#1a1a1a',
+    'En camino':  'background:#3b82f6;color:#fff',
+    'Entregado':  'background:#22c55e;color:#fff',
+    'Cancelado':  'background:#ef4444;color:#fff',
+  };
+  const style = map[estado] || 'background:#6b7280;color:#fff';
+  return `<span style="${style};padding:.2rem .65rem;border-radius:999px;font-size:.78rem;font-weight:600;white-space:nowrap">${estado}</span>`;
+};
+
+function renderOrders(orders) {
+  const statEl = document.getElementById('statPedidos');
+  if (statEl) statEl.textContent = orders.length;
+
+  const enCamino = orders.filter(o => o.estado === 'En camino').length;
+  const statCaminoEl = document.getElementById('statEnCamino');
+  if (statCaminoEl) statCaminoEl.textContent = enCamino;
+
+  const dash = document.getElementById('dashOrdersBody');
+  const full = document.getElementById('ordersBody');
+
+  if (!orders.length) return;
+
+  const makeRow = o => {
+    // Soporte para pedidos del backend (orderItems) y localStorage (productos string)
+    const productos = o.orderItems
+      ? o.orderItems.map(i => `${i.cantidad}x ${i.component?.nombre || 'Producto'}`).join(', ')
+      : (o.productos || '');
+    const fecha = o.creado_en
+      ? new Date(o.creado_en).toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      : (o.fecha || '');
+    const orderId = o.orderId || ('EPC-' + String(o.id).padStart(6, '0'));
+    return `
+      <tr>
+        <td style="font-family:monospace;font-size:.85rem">${orderId}</td>
+        <td>${fecha}</td>
+        <td style="font-size:.85rem;color:var(--clr-muted);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${productos}</td>
+        <td style="font-weight:600">S/ ${Number(o.total).toLocaleString('es-PE')}</td>
+        <td>${estadoBadge(o.estado)}</td>
+        <td></td>
+      </tr>`;
+  };
+
+  if (dash) dash.innerHTML = orders.slice(0, 5).map(makeRow).join('');
+  if (full) full.innerHTML = orders.map(makeRow).join('');
+}
+
+async function loadOrders() {
+  const session = getSession();
+  if (!session?.id) return;
+
+  try {
+    const res = await fetch(`${BACKEND}/orders/usuario/${session.id}`);
+    if (res.ok) {
+      const orders = await res.json();
+      renderOrders(orders);
+      return;
+    }
+  } catch (e) {
+    console.warn('No se pudieron cargar pedidos del servidor, usando localStorage');
+  }
+
+  // Fallback a localStorage
+  const local = JSON.parse(localStorage.getItem('epc_orders') || '[]');
+  renderOrders(local);
 }
 
 // ---------- Wishlist desde backend ----------
