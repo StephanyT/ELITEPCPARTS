@@ -3,9 +3,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { EmailVerificationsController } from './email_verification.controller';
 import { EmailVerificationsService } from './email_verification.service';
 import { EmailVerification } from './email-verification.entity';
+import { Usuario } from '../usuarios/usuario.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([EmailVerification])],
+  imports: [TypeOrmModule.forFeature([EmailVerification, Usuario])],
   controllers: [EmailVerificationsController],
   providers: [EmailVerificationsService],
 })
