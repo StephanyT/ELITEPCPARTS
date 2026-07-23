@@ -11,6 +11,12 @@ services:
       - DB_NAME=elitepcparts
     depends_on:
       - db
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/components"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 40s
 
   db:
     image: postgres:15
@@ -33,10 +39,26 @@ services:
     environment:
       - PGADMIN_DEFAULT_EMAIL=admin@admin.com
       - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_SERVER_JSON_FILE=/pgadmin4/servers.json
     ports:
       - "5050:80"
+    volumes:
+      - ./pgadmin/servers.json:/pgadmin4/servers.json
     depends_on:
       - db
+
+  seeder:
+    image: node:18-alpine
+    volumes:
+      - ./scripts:/app/scripts
+      - ./components.json:/app/components.json
+    working_dir: /app
+    command: node scripts/seed-docker.mjs
+    environment:
+      - BACKEND_URL=http://backend:3000
+    depends_on:
+      backend:
+        condition: service_healthy
 
 volumes:
   pgdata:
