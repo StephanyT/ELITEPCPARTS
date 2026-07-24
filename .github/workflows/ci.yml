@@ -20,5 +20,5 @@ jobs:
       - name: Verificar artefacto de build
         run: |
           test -f dist/index.html
-          test -f dist/src/js/firebase-init.js
+          test -f dist/src/js/main.js
           echo "Build verificado correctamente"
