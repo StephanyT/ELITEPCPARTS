@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 import { Usuario } from '../usuarios/usuario.entity';
 import { EmailVerificationsService } from '../email_verifications/email_verification.service';
 
@@ -14,7 +15,7 @@ export class AuthService {
 
   async login(email: string, password: string) {
     const usuario = await this.usuariosRepository.findOneBy({ email });
-    if (!usuario || usuario.password !== password) {
+    if (!usuario || !(await bcrypt.compare(password, usuario.password))) {
       throw new UnauthorizedException('Email o contrasena incorrectos');
     }
     return {

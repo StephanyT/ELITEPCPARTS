@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 import { Usuario } from './usuario.entity';
 import { EmailVerificationsService } from '../email_verifications/email_verification.service';
 
@@ -21,7 +22,8 @@ export class UsuariosService {
   }
 
   async create(data: Partial<Usuario>) {
-    const usuario = this.usuariosRepository.create({ ...data, verificado: false });
+    const hashedPassword = await bcrypt.hash(data.password!, 10);
+    const usuario = this.usuariosRepository.create({ ...data, password: hashedPassword, verificado: false });
     const guardado = await this.usuariosRepository.save(usuario);
 
     await this.emailVerificationsService.createAndSend(guardado);
