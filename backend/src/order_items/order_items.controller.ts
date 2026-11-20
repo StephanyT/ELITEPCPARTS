@@ -1,9 +1,13 @@
 import { Controller, Get, Post, Delete, Param, Body } from '@nestjs/common';
 import { OrderItemsService } from './order_items.service';
-import { ApiTags, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import { Roles } from '../auth/auth.decorators';
 import { CreateOrderItemDto } from './order-item.dto';
 
+// Uso interno de administración: los clientes ven sus ítems dentro de /orders/mine
 @ApiTags('order_items')
+@ApiBearerAuth()
+@Roles('admin')
 @Controller('order_items')
 export class OrderItemsController {
   constructor(private readonly orderItemsService: OrderItemsService) {}

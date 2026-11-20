@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
+import { escapeHtml } from '../config';
 
 @Injectable()
 export class MailService {
@@ -21,14 +22,16 @@ export class MailService {
     const t = this.transporter();
     if (!t) return;
 
-    const link = `http://localhost/src/pages/verificado.html?token=${token}`;
+    // FRONTEND_URL permite usar el dominio real cuando se despliegue
+    const base = (process.env.FRONTEND_URL ?? 'http://localhost').replace(/\/$/, '');
+    const link = `${base}/src/pages/verificado.html?token=${token}`;
 
     await t.sendMail({
       from: `"Elite PC Parts" <${process.env.MAIL_USER}>`,
       to: email,
       subject: 'Verifica tu cuenta — Elite PC Parts',
       html: `
-        <h2>Hola ${nombre},</h2>
+        <h2>Hola ${escapeHtml(nombre)},</h2>
         <p>Gracias por registrarte en Elite PC Parts.</p>
         <p>Haz clic en el siguiente enlace para verificar tu cuenta:</p>
         <a href="${link}" style="background:#1e40af;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">
@@ -59,14 +62,14 @@ export class MailService {
 
     const itemsHtml = datos.items.map(item => `
       <tr>
-        <td style="padding:10px 12px;border-bottom:1px solid #eee">${item.nombre || 'Producto'}</td>
+        <td style="padding:10px 12px;border-bottom:1px solid #eee">${escapeHtml(item.nombre || 'Producto')}</td>
         <td style="padding:10px 12px;border-bottom:1px solid #eee;text-align:center">${item.cantidad}</td>
         <td style="padding:10px 12px;border-bottom:1px solid #eee;text-align:right">S/ ${Number(item.precio_unitario).toLocaleString('es-PE')}</td>
         <td style="padding:10px 12px;border-bottom:1px solid #eee;text-align:right;font-weight:bold">S/ ${(Number(item.precio_unitario) * item.cantidad).toLocaleString('es-PE')}</td>
       </tr>`).join('');
 
     const direccionHtml = datos.direccion
-      ? `<p style="margin:4px 0"><strong>Dirección de envío:</strong> ${datos.direccion}</p>`
+      ? `<p style="margin:4px 0"><strong>Dirección de envío:</strong> ${escapeHtml(datos.direccion)}</p>`
       : '';
 
     await t.sendMail({
@@ -90,7 +93,7 @@ export class MailService {
 
     <!-- Cuerpo -->
     <div style="padding:32px 30px">
-      <h2 style="color:#003087;margin:0 0 6px">¡Gracias por tu compra, ${datos.nombre}!</h2>
+      <h2 style="color:#003087;margin:0 0 6px">¡Gracias por tu compra, ${escapeHtml(datos.nombre)}!</h2>
       <p style="color:#555;margin:0 0 24px;font-size:15px">Hemos recibido tu pedido y está siendo procesado.</p>
 
       <!-- ID pedido -->
@@ -158,14 +161,14 @@ export class MailService {
     await t.sendMail({
       from: `"Elite PC Parts" <${process.env.MAIL_USER}>`,
       to,
-      subject: `Nuevo mensaje: ${datos.asunto}`,
+      subject: `Nuevo mensaje: ${datos.asunto.replace(/[\r\n]/g, ' ')}`,
       html: `
         <h2>Nuevo mensaje de contacto</h2>
-        <p><strong>Nombre:</strong> ${datos.nombre} ${datos.apellido}</p>
-        <p><strong>Email:</strong> ${datos.email}</p>
-        <p><strong>Asunto:</strong> ${datos.asunto}</p>
+        <p><strong>Nombre:</strong> ${escapeHtml(datos.nombre)} ${escapeHtml(datos.apellido)}</p>
+        <p><strong>Email:</strong> ${escapeHtml(datos.email)}</p>
+        <p><strong>Asunto:</strong> ${escapeHtml(datos.asunto)}</p>
         <p><strong>Mensaje:</strong></p>
-        <p>${datos.mensaje}</p>
+        <p style="white-space:pre-line">${escapeHtml(datos.mensaje)}</p>
       `,
     });
   }

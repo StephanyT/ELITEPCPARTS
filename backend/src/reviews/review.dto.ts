@@ -1,16 +1,18 @@
-import { IsNumber, IsString, IsOptional } from 'class-validator';
+import { IsInt, IsString, IsOptional, Min, Max, MaxLength } from 'class-validator';
 
+// El usuario ya no viene en el body: sale del token
 export class CreateReviewDto {
-  @IsNumber()
-  usuarioId!: number;
-
-  @IsNumber()
+  @IsInt()
+  @Min(1)
   componentId!: number;
 
-  @IsNumber()
+  @IsInt()
+  @Min(1)
+  @Max(5)
   calificacion!: number;
 
   @IsString()
   @IsOptional()
+  @MaxLength(1000)
   comentario?: string;
 }
