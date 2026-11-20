@@ -1,10 +1,12 @@
-FROM node:18-alpine
+# Node 22 LTS: Node 18 ya no recibe parches de seguridad y NestJS 11 pide Node 20 o más
+FROM node:22-alpine
 
 WORKDIR /app
 
-COPY package*.json .
+COPY package*.json ./
 
-RUN npm install
+# npm ci instala exactamente lo que dice package-lock.json (builds reproducibles)
+RUN npm ci
 
 COPY . .
 
