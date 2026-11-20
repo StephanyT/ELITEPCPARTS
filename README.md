@@ -32,13 +32,19 @@ git clone https://github.com/[usuario]/elitepcparts.git
 cd elitepcparts
 ```
 
-Crear archivo `.env` en la raíz:
+Crear el archivo `.env` a partir del ejemplo y completar los valores:
 
-```env
-MAIL_USER=tucorreo@gmail.com
-MAIL_PASS=contraseña_de_aplicacion_gmail
-MAIL_TO=tucorreo@gmail.com
+```bash
+cp .env.example .env
 ```
+
+Los valores obligatorios son `JWT_SECRET`, `ADMIN_EMAIL` y `ADMIN_PASSWORD`: sin ellos el backend no arranca. Para generar un `JWT_SECRET` seguro:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+La cuenta admin se crea sola al arrancar, con el correo y la contraseña del `.env`. El seeder la usa para cargar los productos.
 
 Levantar todos los servicios:
 
@@ -53,8 +59,8 @@ docker compose up -d --build
 | Recurso | URL |
 |---------|-----|
 | Tienda web | http://localhost |
-| API REST (Swagger) | http://localhost:3000/api |
-| pgAdmin | http://localhost:5050 |
+| API REST (Swagger, solo en desarrollo) | http://localhost:3000/api |
+| pgAdmin (solo desde tu máquina) | http://localhost:5050 |
 
 **pgAdmin:** Email: `admin@admin.com` / Contraseña: `admin` / Contraseña del servidor: `secret`
 
@@ -82,18 +88,37 @@ docker compose up -d --build
 
 ## Endpoints principales
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| POST | `/auth/login` | Iniciar sesión |
-| POST | `/usuarios` | Registrar usuario |
-| GET | `/components` | Listar productos |
-| GET | `/cart` | Ver carrito (header: usuario-id) |
-| POST | `/cart` | Agregar al carrito |
-| POST | `/orders` | Crear pedido |
-| GET | `/orders/usuario/:id` | Historial de pedidos |
-| POST | `/reviews` | Crear reseña |
-| GET | `/wishlist/usuario/:id` | Lista de deseos |
-| POST | `/contacto` | Enviar mensaje de contacto |
+Las rutas protegidas piden el header `Authorization: Bearer <token>`. El token se obtiene en `/auth/login`.
+
+| Método | Endpoint | Acceso | Descripción |
+|--------|----------|--------|-------------|
+| POST | `/auth/login` | Público | Iniciar sesión (devuelve el token) |
+| POST | `/auth/reenviar-verificacion` | Público | Reenviar el correo de verificación |
+| POST | `/usuarios` | Público | Registrar usuario |
+| GET | `/usuarios/me` | Usuario | Mi perfil |
+| GET | `/components` | Público | Listar productos |
+| POST / DELETE | `/components` | Admin | Crear o borrar productos |
+| GET / POST / PATCH / DELETE | `/cart` | Usuario | Mi carrito |
+| POST | `/orders` | Usuario | Crear pedido (el total lo calcula el servidor) |
+| GET | `/orders/mine` | Usuario | Mis pedidos |
+| GET | `/orders` | Admin | Todos los pedidos |
+| GET | `/reviews/component/:id` | Público | Reseñas de un producto |
+| POST | `/reviews` | Usuario | Crear reseña (1 por producto) |
+| GET / POST / DELETE | `/wishlist` | Usuario | Mi lista de deseos |
+| POST | `/contacto` | Público | Enviar mensaje de contacto |
+| GET | `/contacto` | Admin | Leer mensajes |
+
+---
+
+## Seguridad
+
+- **Autenticación con JWT**: el usuario sale del token firmado, nunca de un id que mande el navegador.
+- **Roles** `cliente` y `admin`: las rutas de administración están protegidas con `@Roles('admin')`.
+- **Validación estricta**: `ValidationPipe` con `whitelist` y `forbidNonWhitelisted`; todos los endpoints usan DTOs.
+- **Precios en el servidor**: el total del pedido se calcula con los precios de la base de datos, dentro de una transacción.
+- **Login**: exige correo verificado y tiene límite de 5 intentos por minuto.
+- **Salida segura**: el hash de la contraseña nunca se devuelve y el frontend escapa el contenido de los usuarios (sin XSS).
+- **Configuración**: secretos en `.env`, `helmet`, CORS restringido y Swagger apagado en producción.
 
 ---
 
