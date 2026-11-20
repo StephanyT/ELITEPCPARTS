@@ -25,8 +25,8 @@ function fillProfile(session) {
 // Cargar datos al iniciar
 const _session = getSession();
 fillProfile(_session);
-if (_session?.id) {
-  loadWishlist(_session.id);
+if (_session) {
+  loadWishlist();
 }
 loadOrders();
 
@@ -64,7 +64,7 @@ const estadoBadge = estado => {
     'Cancelado':  'background:#ef4444;color:#fff',
   };
   const style = map[estado] || 'background:#6b7280;color:#fff';
-  return `<span style="${style};padding:.2rem .65rem;border-radius:999px;font-size:.78rem;font-weight:600;white-space:nowrap">${estado}</span>`;
+  return `<span style="${style};padding:.2rem .65rem;border-radius:999px;font-size:.78rem;font-weight:600;white-space:nowrap">${escapeHtml(estado)}</span>`;
 };
 
 function renderOrders(orders) {
@@ -87,18 +87,18 @@ function renderOrders(orders) {
           const nombre = i.component?.nombre || 'Producto';
           const id = i.component?.id;
           return id
-            ? `${i.cantidad}x <a href="producto.html?id=${id}" style="color:var(--clr-accent);text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${nombre}</a>`
-            : `${i.cantidad}x ${nombre}`;
+            ? `${i.cantidad}x <a href="producto.html?id=${encodeURIComponent(id)}" style="color:var(--clr-accent);text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${escapeHtml(nombre)}</a>`
+            : `${i.cantidad}x ${escapeHtml(nombre)}`;
         }).join('<br>')
-      : (o.productos || '');
+      : escapeHtml(o.productos || '');
     const fecha = o.creado_en
       ? new Date(o.creado_en).toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' })
       : (o.fecha || '');
     const orderId = o.orderId || ('EPC-' + String(o.id).padStart(6, '0'));
     return `
       <tr>
-        <td style="font-family:monospace;font-size:.85rem">${orderId}</td>
-        <td>${fecha}</td>
+        <td style="font-family:monospace;font-size:.85rem">${escapeHtml(orderId)}</td>
+        <td>${escapeHtml(fecha)}</td>
         <td style="font-size:.85rem;color:var(--clr-muted);max-width:280px;line-height:1.5">${productos}</td>
         <td style="font-weight:600">S/ ${Number(o.total).toLocaleString('es-PE')}</td>
         <td>${estadoBadge(o.estado)}</td>
@@ -112,10 +112,11 @@ function renderOrders(orders) {
 
 async function loadOrders() {
   const session = getSession();
-  if (!session?.id) return;
+  if (!session) return;
 
   try {
-    const res = await fetch(`${BACKEND}/orders/usuario/${session.id}`);
+    // /orders/mine: el backend sabe quién eres por el token
+    const res = await fetch(`${BACKEND}/orders/mine`, { headers: authHeaders() });
     if (res.ok) {
       const orders = await res.json();
       renderOrders(orders);
@@ -131,12 +132,13 @@ async function loadOrders() {
 }
 
 // ---------- Wishlist desde backend ----------
-async function loadWishlist(usuarioId) {
+async function loadWishlist() {
   const wishGrid = document.getElementById('wishlistGrid');
   if (!wishGrid) return;
 
   try {
-    const res = await fetch(`${BACKEND}/wishlist/usuario/${usuarioId}`);
+    const res = await fetch(`${BACKEND}/wishlist`, { headers: authHeaders() });
+    if (!res.ok) throw new Error('wishlist ' + res.status);
     const items = await res.json();
 
     // Actualizar stat de deseados
@@ -154,17 +156,17 @@ async function loadWishlist(usuarioId) {
       return `
         <article class="product-card">
           <div style="position:relative">
-            <img src="${c.imagen_url}" alt="${c.nombre}" style="width:100%;height:180px;object-fit:contain;background:#f5f5f5;border-radius:8px 8px 0 0" onerror="this.style.display='none'">
+            <img src="${escapeHtml(c.imagen_url)}" alt="${escapeHtml(c.nombre)}" style="width:100%;height:180px;object-fit:contain;background:#f5f5f5;border-radius:8px 8px 0 0" onerror="this.style.display='none'">
             <button class="wishlist-remove-btn" data-id="${item.id}" title="Quitar de deseados" style="position:absolute;top:8px;right:8px;background:#fff;border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.15)">
               <i class="fa fa-times" style="color:#ef4444;font-size:.8rem"></i>
             </button>
           </div>
-          <div class="product-card__body" onclick="window.location='producto.html?id=${c.id}'" style="cursor:pointer">
-            <span class="product-card__cat">${c.categoria}</span>
-            <p class="product-card__name">${c.nombre}</p>
+          <div class="product-card__body" onclick="window.location='producto.html?id=${Number(c.id)}'" style="cursor:pointer">
+            <span class="product-card__cat">${escapeHtml(c.categoria)}</span>
+            <p class="product-card__name">${escapeHtml(c.nombre)}</p>
             <div class="product-card__footer">
               <span class="product-card__price">S/ ${precio}</span>
-              <button class="product-card__add" onclick="event.stopPropagation();addToCart('${c.id}')"><i class="fa fa-plus"></i></button>
+              <button class="product-card__add" onclick="event.stopPropagation();addToCart('${Number(c.id)}')"><i class="fa fa-plus"></i></button>
             </div>
           </div>
         </article>`;
@@ -175,8 +177,8 @@ async function loadWishlist(usuarioId) {
       btn.addEventListener('click', async e => {
         e.stopPropagation();
         const wishlistId = btn.dataset.id;
-        await fetch(`${BACKEND}/wishlist/${wishlistId}`, { method: 'DELETE' });
-        loadWishlist(usuarioId);
+        await fetch(`${BACKEND}/wishlist/${encodeURIComponent(wishlistId)}`, { method: 'DELETE', headers: authHeaders() });
+        loadWishlist();
         showToast('Eliminado de deseados');
       });
     });

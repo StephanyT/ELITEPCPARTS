@@ -48,11 +48,8 @@ document.getElementById('wishlistBtn')?.addEventListener('click', async () => {
   try {
     const res = await fetch(`${BACKEND}/wishlist`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        usuarioId: session.id,
-        componentId: parseInt(currentProduct.id),
-      }),
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ componentId: parseInt(currentProduct.id) }),
     });
 
     if (res.status === 409) {
@@ -179,14 +176,14 @@ async function loadReviews(componentId) {
       return `
         <div class="review-card">
           <div class="review-header">
-            <div class="reviewer-avatar">${initials}</div>
+            <div class="reviewer-avatar">${escapeHtml(initials)}</div>
             <div>
-              <strong>${nombre}</strong>
+              <strong>${escapeHtml(nombre)}</strong>
               <div class="stars">${starsHTML(Number(r.calificacion))}</div>
             </div>
-            <span class="review-date">${formatDate(r.creado_en)}</span>
+            <span class="review-date">${escapeHtml(formatDate(r.creado_en))}</span>
           </div>
-          ${r.comentario ? `<p>${r.comentario}</p>` : ''}
+          ${r.comentario ? `<p>${escapeHtml(r.comentario)}</p>` : ''}
         </div>`;
     }).join('');
 
@@ -215,11 +212,11 @@ document.getElementById('submitReviewBtn')?.addEventListener('click', async () =
   msg.style.display = 'none';
 
   try {
+    // Ya no se manda usuarioId: el backend lo saca del token
     const res = await fetch(`${BACKEND}/reviews`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({
-        usuarioId: session.id,
         componentId: parseInt(currentProduct.id),
         calificacion: selectedStars,
         comentario,
@@ -235,7 +232,9 @@ document.getElementById('submitReviewBtn')?.addEventListener('click', async () =
       starSpans.forEach(s => s.classList.remove('active'));
       await loadReviews(parseInt(currentProduct.id));
     } else {
-      msg.textContent = 'Error al enviar la reseña.';
+      msg.textContent = res.status === 409
+        ? 'Ya dejaste una reseña para este producto.'
+        : 'Error al enviar la reseña.';
       msg.style.color = '#ef4444';
       msg.style.display = 'block';
     }

@@ -2,6 +2,18 @@
 // ELITE PC PARTS — Main JS
 // ============================================================
 
+// ---------- Seguridad: escapar texto antes de meterlo en innerHTML ----------
+// Todo lo que escribe un usuario (reseñas, nombres) pasa por aquí.
+// Así "<img onerror=...>" se muestra como texto y no se ejecuta.
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 // ---------- Mobile nav ----------
 const hamburger = document.getElementById('hamburger');
 const mobileNav = document.getElementById('mobileNav');
@@ -26,39 +38,39 @@ function saveCart() {
 // ---------- Cart ↔ Backend sync helpers ----------
 function cartBackendAdd(componentId, cantidad) {
   const s = typeof getSession === 'function' ? getSession() : null;
-  if (!s?.id) return Promise.resolve(null);
+  if (!s?.token) return Promise.resolve(null);
   return fetch(`${BACKEND}/cart`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'usuario-id': String(s.id) },
+    headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ component_id: parseInt(componentId), cantidad }),
   }).then(r => r.ok ? r.json() : null).catch(() => null);
 }
 
 function cartBackendUpdate(cartItemId, cantidad) {
   const s = typeof getSession === 'function' ? getSession() : null;
-  if (!s?.id || !cartItemId) return;
+  if (!s?.token || !cartItemId) return;
   fetch(`${BACKEND}/cart/${cartItemId}`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', 'usuario-id': String(s.id) },
+    headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ cantidad }),
   }).catch(() => {});
 }
 
 function cartBackendRemove(cartItemId) {
   const s = typeof getSession === 'function' ? getSession() : null;
-  if (!s?.id || !cartItemId) return;
+  if (!s?.token || !cartItemId) return;
   fetch(`${BACKEND}/cart/${cartItemId}`, {
     method: 'DELETE',
-    headers: { 'usuario-id': String(s.id) },
+    headers: authHeaders(),
   }).catch(() => {});
 }
 
 function cartBackendClear() {
   const s = typeof getSession === 'function' ? getSession() : null;
-  if (!s?.id) return;
+  if (!s?.token) return;
   fetch(`${BACKEND}/cart`, {
     method: 'DELETE',
-    headers: { 'usuario-id': String(s.id) },
+    headers: authHeaders(),
   }).catch(() => {});
 }
 

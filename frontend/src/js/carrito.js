@@ -148,10 +148,10 @@ function renderSuggested() {
 // Cargar carrito desde backend al entrar a la página (si hay sesión activa)
 (async function initCart() {
   const session = typeof getSession === 'function' ? getSession() : null;
-  if (session?.id) {
+  if (session?.token) {
     try {
       const res = await fetch(`${BACKEND}/cart`, {
-        headers: { 'usuario-id': String(session.id) },
+        headers: authHeaders(),
       });
       if (res.ok) {
         const items = await res.json();

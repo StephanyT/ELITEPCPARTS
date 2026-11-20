@@ -97,7 +97,7 @@
           <label for="password">Contraseña <span class="req">*</span></label>
           <div class="input-icon">
             <i class="fa fa-lock"></i>
-            <input type="password" id="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
+            <input type="password" id="password" placeholder="Mínimo 8 caracteres" autocomplete="new-password" />
             <button type="button" class="toggle-pwd" id="togglePwd" tabindex="-1">
               <i class="fa fa-eye"></i>
             </button>
@@ -188,7 +188,7 @@
       if (!lastName)  { setError('lastName',  'Ingresa tu apellido'); valid = false; }
       if (!email) { setError('email', 'Ingresa tu email'); valid = false; }
       else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError('email', 'Email inválido'); valid = false; }
-      if (!password || password.length < 6) { setError('password', 'Mínimo 6 caracteres'); valid = false; }
+      if (!password || password.length < 8) { setError('password', 'Mínimo 8 caracteres'); valid = false; }
       if (password !== confirm) { setError('confirm', 'Las contraseñas no coinciden'); valid = false; }
       if (!terms) { setError('terms', 'Debes aceptar los términos'); valid = false; }
       if (!valid) return;
@@ -199,15 +199,15 @@
 
       try {
         const nombre = `${firstName} ${lastName}`;
-        await registerWithBackend(nombre, email, password);
+        const r = await registerWithBackend(nombre, email, password);
         document.getElementById('registerForm').style.display = 'none';
         document.querySelector('.auth-divider')?.remove();
         document.querySelector('.social-btns')?.remove();
-        showAlert('¡Cuenta creada! Revisa tu correo para verificar tu cuenta antes de iniciar sesión.', 'success');
+        showAlert(r.mensaje || '¡Cuenta creada! Revisa tu correo para verificar tu cuenta antes de iniciar sesión.', 'success');
       } catch (err) {
         btn.disabled = false;
         btn.innerHTML = 'Crear cuenta';
-        if (err.message.includes('duplicate') || err.message.includes('unique')) {
+        if (err.status === 409) {
           setError('email', 'Ya existe una cuenta con ese email');
         } else {
           showAlert(err.message || 'Error al crear la cuenta', 'error');
