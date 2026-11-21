@@ -1,0 +1,8 @@
+# Dependencias y builds de tu PC: el contenedor instala y compila los suyos
+node_modules
+dist
+
+# Archivos que no hacen falta dentro de la imagen
+coverage
+npm-debug.log
+.env
