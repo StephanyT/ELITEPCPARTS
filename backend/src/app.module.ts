@@ -25,18 +25,23 @@ import { ContactoModule } from './contacto/contacto.module';
 import { MailModule } from './mail/mail.module';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { RolesGuard } from './auth/roles.guard';
+import { isProduction, requiredEnv } from './config';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT ?? '5432'),
-      username: process.env.DB_USER || 'admin',
-      password: process.env.DB_PASSWORD || 'secret',
-      database: process.env.DB_NAME || 'elitepcparts',
-      entities: [Usuario, Component, Order, OrderItem, Cart, Review, Wishlist, EmailVerification, Contacto],
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      useFactory: () => ({
+        type: 'postgres',
+        host: process.env.DB_HOST || 'localhost',
+        port: parseInt(process.env.DB_PORT ?? '5432'),
+        username: process.env.DB_USER || 'admin',
+        // Sin contraseña por defecto en el código: tiene que venir del entorno
+        password: requiredEnv('DB_PASSWORD'),
+        database: process.env.DB_NAME || 'elitepcparts',
+        entities: [Usuario, Component, Order, OrderItem, Cart, Review, Wishlist, EmailVerification, Contacto],
+        // synchronize cambia las tablas solo. Útil en desarrollo, peligroso en producción.
+        synchronize: !isProduction(),
+      }),
     }),
     // Límite general: 100 peticiones por minuto por IP. Algunas rutas tienen uno más estricto.
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),

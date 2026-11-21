@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
@@ -8,6 +8,8 @@ import { EmailVerificationsService } from '../email_verifications/email_verifica
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     @InjectRepository(Usuario)
     private usuariosRepository: Repository<Usuario>,
@@ -28,7 +30,11 @@ export class AuthService {
       throw new UnauthorizedException('Email o contraseña incorrectos');
     }
 
-    // En el token solo va el id (sub) y el rol: nada sensible, porque cualquiera puede leerlo
+    // Recién después de comprobar la contraseña se revisa si verificó su correo
+    if (!usuario.verificado) {
+      throw new ForbiddenException('Debes verificar tu correo antes de iniciar sesión');
+    }
+
     const token = await this.jwtService.signAsync({ sub: usuario.id, rol: usuario.rol });
 
     return {
@@ -44,5 +50,19 @@ export class AuthService {
 
   async verificarEmail(token: string) {
     return this.emailVerificationsService.validateToken(token);
+  }
+
+  async reenviarVerificacion(email: string) {
+    const usuario = await this.usuariosRepository.findOneBy({ email: email.trim().toLowerCase() });
+    if (usuario && !usuario.verificado) {
+      try {
+        await this.emailVerificationsService.createAndSend(usuario);
+      } catch (err) {
+        // Si el correo falla no respondemos 500: eso revelaría que la cuenta existe
+        this.logger.error(`No se pudo reenviar la verificación: ${(err as Error).message}`);
+      }
+    }
+    // Siempre la misma respuesta, exista o no el correo
+    return { mensaje: 'Si el correo está registrado y no fue verificado, te enviamos un nuevo enlace.' };
   }
 }

@@ -15,6 +15,12 @@ export class LoginDto {
   password!: string;
 }
 
+export class ReenviarDto {
+  @IsEmail()
+  @MaxLength(254)
+  email!: string;
+}
+
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
@@ -34,5 +40,15 @@ export class AuthController {
   @Get('verificar')
   verificar(@Query('token') token: string) {
     return this.authService.verificarEmail(token);
+  }
+
+  // Más estricto que el login: cada llamada puede mandar un correo
+  @Public()
+  @Throttle({ default: { limit: 3, ttl: 60_000 } })
+  @Post('reenviar-verificacion')
+  @HttpCode(200)
+  @ApiBody({ schema: { example: { email: 'test@test.com' } } })
+  reenviar(@Body() dto: ReenviarDto) {
+    return this.authService.reenviarVerificacion(dto.email);
   }
 }

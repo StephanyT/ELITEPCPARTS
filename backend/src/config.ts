@@ -9,3 +9,13 @@ export function requiredEnv(name: string): string {
 }
 
 export const isProduction = () => process.env.NODE_ENV === 'production';
+
+// Escapa texto antes de meterlo en HTML (correos). Evita que alguien inyecte etiquetas.
+export function escapeHtml(value: unknown): string {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
