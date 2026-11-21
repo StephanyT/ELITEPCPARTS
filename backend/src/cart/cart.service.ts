@@ -43,6 +43,10 @@ export class CartService {
     });
 
     if (existente) {
+      // Si ya estaba en el carrito, se suma; pero nunca más de 99 en total
+      if (existente.cantidad + cantidad > 99) {
+        throw new BadRequestException('Máximo 99 unidades por producto');
+      }
       existente.cantidad += cantidad;
       return this.cartRepository.save(existente);
     }
@@ -98,8 +102,8 @@ export class CartService {
   }
 
   private ensureCantidadValida(cantidad: number) {
-    if (!Number.isInteger(cantidad) || cantidad <= 0) {
-      throw new BadRequestException('La cantidad debe ser mayor a 0');
+    if (!Number.isInteger(cantidad) || cantidad <= 0 || cantidad > 99) {
+      throw new BadRequestException('La cantidad debe estar entre 1 y 99');
     }
   }
 
