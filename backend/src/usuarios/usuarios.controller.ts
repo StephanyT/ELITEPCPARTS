@@ -1,34 +1,45 @@
-import { Controller, Get, Post, Delete, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Body, ParseIntPipe } from '@nestjs/common';
+import { ApiTags, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { UsuariosService } from './usuarios.service';
 import { Usuario } from './usuario.entity';
-import { ApiTags, ApiBody } from '@nestjs/swagger';
-import { Public } from '../auth/auth.decorators';
+import { CurrentUser, Public, Roles } from '../auth/auth.decorators';
+import type { UsuarioToken } from '../auth/auth.decorators';
 
 @ApiTags('usuarios')
+@ApiBearerAuth()
 @Controller('usuarios')
 export class UsuariosController {
   constructor(private readonly usuariosService: UsuariosService) {}
 
+  // Registro: tiene que ser público, porque quien se registra todavía no tiene cuenta
+  @Public()
+  @Post()
+  @ApiBody({ schema: { example: { nombre: 'Test', email: 'test@test.com', password: '12345678' } } })
+  create(@Body() data: Partial<Usuario>) {
+    return this.usuariosService.create(data);
+  }
+
+  // Mi perfil: el id sale del token
+  @Get('me')
+  me(@CurrentUser() usuario: UsuarioToken) {
+    return this.usuariosService.findOne(usuario.id);
+  }
+
+  @Roles('admin')
   @Get()
   findAll() {
     return this.usuariosService.findAll();
   }
 
+  @Roles('admin')
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usuariosService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.usuariosService.findOne(id);
   }
 
-  // Registro: tiene que ser público, porque quien se registra todavía no tiene cuenta
-  @Public()
-  @Post()
-  @ApiBody({ schema: { example: { nombre: 'Test', email: 'test@test.com', password: '123456' } } })
-  create(@Body() data: Partial<Usuario>) {
-    return this.usuariosService.create(data);
-  }
-
+  @Roles('admin')
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usuariosService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.usuariosService.remove(id);
   }
 }
