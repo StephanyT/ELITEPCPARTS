@@ -1,36 +1,28 @@
-import { IsNumber, IsString, IsArray, IsOptional, ValidateNested } from 'class-validator';
+import { IsInt, IsString, IsArray, IsOptional, ValidateNested, Min, Max, MaxLength, ArrayMinSize, ArrayMaxSize } from 'class-validator';
 import { Type } from 'class-transformer';
 
+// El cliente solo dice QUÉ quiere y CUÁNTO.
+// El precio y el total los pone el servidor con los datos de la base.
 export class OrderItemDto {
-  @IsNumber()
+  @IsInt()
+  @Min(1)
   componentId!: number;
 
-  @IsNumber()
+  @IsInt()
+  @Min(1)
+  @Max(99)
   cantidad!: number;
-
-  @IsNumber()
-  precio_unitario!: number;
-
-  @IsString()
-  @IsOptional()
-  nombre?: string;
 }
 
 export class CreateOrderDto {
-  @IsNumber()
-  usuarioId!: number;
-
-  @IsNumber()
-  total!: number;
-
-  @IsOptional()
-  estado?: string;
-
   @IsString()
   @IsOptional()
+  @MaxLength(300)
   direccion?: string;
 
   @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(50)
   @ValidateNested({ each: true })
   @Type(() => OrderItemDto)
   items!: OrderItemDto[];
