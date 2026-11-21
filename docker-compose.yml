@@ -14,6 +14,13 @@ services:
       - MAIL_USER=${MAIL_USER}
       - MAIL_PASS=${MAIL_PASS}
       - MAIL_TO=${MAIL_TO}
+      # Seguridad: sin estos valores el backend no arranca (ver .env.example)
+      - JWT_SECRET=${JWT_SECRET:?Falta JWT_SECRET en el archivo .env}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-8h}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:?Falta ADMIN_EMAIL en el archivo .env}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:?Falta ADMIN_PASSWORD en el archivo .env}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost,http://127.0.0.1}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost}
     depends_on:
       - db
     healthcheck:
@@ -45,15 +52,16 @@ services:
       - PGADMIN_DEFAULT_EMAIL=admin@admin.com
       - PGADMIN_DEFAULT_PASSWORD=admin
       - PGADMIN_SERVER_JSON_FILE=/pgadmin4/servers.json
+    # Solo accesible desde tu propia máquina (127.0.0.1), nunca desde internet
     ports:
-      - "5050:80"
+      - "127.0.0.1:5050:80"
     volumes:
       - ./pgadmin/servers.json:/pgadmin4/servers.json
     depends_on:
       - db
 
   seeder:
-    image: node:18-alpine
+    image: node:22-alpine
     volumes:
       - ./scripts:/app/scripts
       - ./components.json:/app/components.json
@@ -61,6 +69,8 @@ services:
     command: node scripts/seed-docker.mjs
     environment:
       - BACKEND_URL=http://backend:3000
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
     depends_on:
       backend:
         condition: service_healthy
