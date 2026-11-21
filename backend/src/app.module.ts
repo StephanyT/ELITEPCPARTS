@@ -1,5 +1,7 @@
 import { Module, MiddlewareConsumer } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { Usuario } from './usuarios/usuario.entity';
 import { Component } from './components/component.entity';
 import { Order } from './orders/order.entity';
@@ -21,6 +23,8 @@ import { LoggerMiddleware } from './logger.middleware';
 import { AuthModule } from './auth/auth.module';
 import { ContactoModule } from './contacto/contacto.module';
 import { MailModule } from './mail/mail.module';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { RolesGuard } from './auth/roles.guard';
 
 @Module({
   imports: [
@@ -34,6 +38,8 @@ import { MailModule } from './mail/mail.module';
       entities: [Usuario, Component, Order, OrderItem, Cart, Review, Wishlist, EmailVerification, Contacto],
       synchronize: true,
     }),
+    // Límite general: 100 peticiones por minuto por IP. Algunas rutas tienen uno más estricto.
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
     UsuariosModule,
     ComponentsModule,
     OrdersModule,
@@ -45,6 +51,13 @@ import { MailModule } from './mail/mail.module';
     AuthModule,
     ContactoModule,
     MailModule,
+  ],
+  providers: [
+    // Los guards globales corren en este orden en cada petición:
+    // 1) límite de peticiones  2) ¿token válido?  3) ¿tiene el rol necesario?
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
   ],
 })
 export class AppModule {

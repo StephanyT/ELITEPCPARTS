@@ -12,10 +12,16 @@ async function bootstrap() {
     .setTitle('Elite PC Parts API')
     .setDescription('API del backend de Elite PC Parts')
     .setVersion('1.0')
+    .addBearerAuth()
+    // Que Swagger mande el token en todas las rutas (las públicas lo ignoran)
+    .addSecurityRequirements('bearer')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  // persistAuthorization: el token no se borra al recargar la página
+  SwaggerModule.setup('api', app, document, {
+    swaggerOptions: { persistAuthorization: true },
+  });
 
   await app.listen(3000);
 }

@@ -2,6 +2,7 @@ import { Controller, Get, Post, Delete, Param, Body } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateReviewDto } from './review.dto';
+import { Public } from '../auth/auth.decorators';
 
 @ApiTags('reviews')
 @Controller('reviews')
@@ -13,6 +14,8 @@ export class ReviewsController {
     return this.reviewsService.findAll();
   }
 
+  // Las reseñas de un producto las puede ver cualquiera, aunque no tenga cuenta
+  @Public()
   @Get('component/:componentId')
   findByComponent(@Param('componentId') componentId: string) {
     return this.reviewsService.findByComponent(+componentId);
