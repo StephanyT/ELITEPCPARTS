@@ -2,6 +2,18 @@
 // ELITE PC PARTS — Main JS
 // ============================================================
 
+// ---------- Seguridad: escapar texto antes de meterlo en innerHTML ----------
+// Todo lo que escribe un usuario (reseñas, nombres) pasa por aquí.
+// Así "<img onerror=...>" se muestra como texto y no se ejecuta.
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 // ---------- Mobile nav ----------
 const hamburger = document.getElementById('hamburger');
 const mobileNav = document.getElementById('mobileNav');
@@ -24,41 +36,43 @@ function saveCart() {
 }
 
 // ---------- Cart ↔ Backend sync helpers ----------
+// Solo se sincroniza con el backend si hay sesión con token.
+// Sin sesión, el carrito vive solo en localStorage (modo invitado).
 function cartBackendAdd(componentId, cantidad) {
   const s = typeof getSession === 'function' ? getSession() : null;
-  if (!s?.id) return Promise.resolve(null);
+  if (!s?.token) return Promise.resolve(null);
   return fetch(`${BACKEND}/cart`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'usuario-id': String(s.id) },
+    headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ component_id: parseInt(componentId), cantidad }),
   }).then(r => r.ok ? r.json() : null).catch(() => null);
 }
 
 function cartBackendUpdate(cartItemId, cantidad) {
   const s = typeof getSession === 'function' ? getSession() : null;
-  if (!s?.id || !cartItemId) return;
+  if (!s?.token || !cartItemId) return;
   fetch(`${BACKEND}/cart/${cartItemId}`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', 'usuario-id': String(s.id) },
+    headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ cantidad }),
   }).catch(() => {});
 }
 
 function cartBackendRemove(cartItemId) {
   const s = typeof getSession === 'function' ? getSession() : null;
-  if (!s?.id || !cartItemId) return;
+  if (!s?.token || !cartItemId) return;
   fetch(`${BACKEND}/cart/${cartItemId}`, {
     method: 'DELETE',
-    headers: { 'usuario-id': String(s.id) },
+    headers: authHeaders(),
   }).catch(() => {});
 }
 
 function cartBackendClear() {
   const s = typeof getSession === 'function' ? getSession() : null;
-  if (!s?.id) return;
+  if (!s?.token) return;
   fetch(`${BACKEND}/cart`, {
     method: 'DELETE',
-    headers: { 'usuario-id': String(s.id) },
+    headers: authHeaders(),
   }).catch(() => {});
 }
 
@@ -140,7 +154,7 @@ function formatPrice(n) {
 
 // Reusable product thumbnail. Falls back to the box icon if the image fails to load.
 function productImg(p, cls = 'product-card__img') {
-  return `<div class="${cls}"><img src="${p.image}" alt="${p.name}" loading="lazy" onerror="imgError(this)"></div>`;
+  return `<div class="${cls}"><img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="imgError(this)"></div>`;
 }
 
 function imgError(img) {
@@ -157,8 +171,8 @@ function renderProducts() {
     <article class="product-card" data-id="${p.id}" onclick="window.location='src/pages/producto.html?id=${p.id}'">
       ${productImg(p)}
       <div class="product-card__body">
-        <span class="product-card__cat">${p.category}</span>
-        <p class="product-card__name">${p.name}</p>
+        <span class="product-card__cat">${escapeHtml(p.category)}</span>
+        <p class="product-card__name">${escapeHtml(p.name)}</p>
         <div class="product-card__stars">
           ${starsHTML(p.rating)}
           <span>(${p.reviews})</span>

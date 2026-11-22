@@ -23,16 +23,48 @@ function showAlert(msg, type = 'error') {
   const alert = document.getElementById('authAlert');
   if (!alert) return;
   alert.className = 'auth-alert ' + type;
-  alert.innerHTML = `<i class="fa fa-${type === 'error' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'}"></i> ${msg}`;
+  const icon = type === 'error' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle';
+  alert.innerHTML = `<i class="fa fa-${icon}"></i> `;
+  // El mensaje va como texto: si trae HTML, no se ejecuta
+  alert.appendChild(document.createTextNode(msg));
   alert.style.display = 'flex';
 }
 
+// Lee el "exp" (vencimiento) del JWT. El payload es base64, no está cifrado.
+function tokenVencido(token) {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    return !payload.exp || payload.exp * 1000 <= Date.now();
+  } catch {
+    return true;
+  }
+}
+
+// La sesión guarda { id, nombre, email, rol, token }.
+// Si no hay token o ya venció, se considera que no hay sesión.
 function getSession() {
   const raw = localStorage.getItem('epc_session') || sessionStorage.getItem('epc_session');
-  return raw ? JSON.parse(raw) : null;
+  if (!raw) return null;
+  try {
+    const session = JSON.parse(raw);
+    if (!session?.token || tokenVencido(session.token)) {
+      clearSession();
+      return null;
+    }
+    return session;
+  } catch {
+    clearSession();
+    return null;
+  }
 }
 function cacheSession(profile) {
   localStorage.setItem('epc_session', JSON.stringify(profile));
+}
+
+// Headers para llamar a rutas protegidas: "Authorization: Bearer <token>"
+function authHeaders(extra = {}) {
+  const session = getSession();
+  return session?.token ? { ...extra, Authorization: `Bearer ${session.token}` } : { ...extra };
 }
 function clearSession() {
   localStorage.removeItem('epc_session');
@@ -62,13 +94,13 @@ function updateHeaderAuth(session) {
     const initials = (nombre[0] || session.email?.[0] || 'U').toUpperCase();
     el.outerHTML = `
       <div class="user-menu-wrap">
-        <button class="user-avatar-btn" id="userMenuBtn" title="${nombre || session.email}">
-          <span class="user-initials">${initials}</span>
+        <button class="user-avatar-btn" id="userMenuBtn" title="${escapeHtml(nombre || session.email)}">
+          <span class="user-initials">${escapeHtml(initials)}</span>
         </button>
         <div class="user-dropdown" id="userDropdown">
           <div class="user-dropdown__header">
-            <strong>${nombre}</strong>
-            <span>${session.email || ''}</span>
+            <strong>${escapeHtml(nombre)}</strong>
+            <span>${escapeHtml(session.email || '')}</span>
           </div>
           <a href="${PAGE_PREFIX}cuenta.html"><i class="fa fa-user"></i> Mi cuenta</a>
           <a href="${PAGE_PREFIX}cuenta.html#orders"><i class="fa fa-box"></i> Mis pedidos</a>
@@ -97,10 +129,12 @@ function logout() {
   location.href = HOME_HREF;
 }
 
-function loginSuccess(profile) {
-  cacheSession(profile);
+// El backend responde { token, usuario }. Guardamos los dos juntos.
+function loginSuccess(data) {
+  cacheSession({ ...data.usuario, token: data.token });
+  // Solo se permite redirigir a páginas de la propia tienda (evita mandar al usuario a otro sitio)
   const redirect = new URLSearchParams(location.search).get('redirect') || 'cuenta.html';
-  location.href = redirect;
+  location.href = /^[a-z0-9_-]+\.html(#[a-z0-9_-]*)?$/i.test(redirect) ? redirect : 'cuenta.html';
 }
 
 function requireAuth() {
@@ -117,11 +151,19 @@ async function registerWithBackend(nombre, email, password) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ nombre, email, password }),
   });
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.message || 'Error al registrar');
+    const err = new Error(mensajeDeError(data, 'Error al registrar'));
+    err.status = res.status;
+    throw err;
   }
-  return res.json();
+  return data;
+}
+
+// Los errores de validación de NestJS vienen como lista: tomamos el primero
+function mensajeDeError(data, porDefecto) {
+  if (Array.isArray(data?.message)) return data.message[0];
+  return data?.message || porDefecto;
 }
 
 async function loginWithBackend(email, password) {
@@ -130,8 +172,28 @@ async function loginWithBackend(email, password) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
   });
-  if (!res.ok) throw new Error('Email o contraseña incorrectos');
-  return res.json();
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    // 403 = cuenta sin verificar, 429 = demasiados intentos, 401 = datos incorrectos
+    const porDefecto = res.status === 429
+      ? 'Demasiados intentos. Espera un minuto e inténtalo de nuevo.'
+      : 'Email o contraseña incorrectos';
+    const err = new Error(res.status === 429 ? porDefecto : mensajeDeError(data, porDefecto));
+    err.status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+async function reenviarVerificacion(email) {
+  const res = await fetch(`${BACKEND}/auth/reenviar-verificacion`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(mensajeDeError(data, 'No se pudo reenviar el correo'));
+  return data;
 }
 
 updateHeaderAuth(getSession());
