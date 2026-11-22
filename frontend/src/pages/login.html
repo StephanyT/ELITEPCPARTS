@@ -127,12 +127,31 @@
       btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Ingresando...';
 
       try {
-        const usuario = await loginWithBackend(email, password);
-        loginSuccess(usuario);
+        const data = await loginWithBackend(email, password);
+        loginSuccess(data);
       } catch (err) {
         btn.disabled = false;
         btn.innerHTML = 'Iniciar sesión';
-        showAlert('Email o contraseña incorrectos.', 'error');
+        showAlert(err.message || 'Email o contraseña incorrectos.', 'error');
+
+        // Cuenta sin verificar: ofrecer reenviar el correo
+        if (err.status === 403) {
+          const alertBox = document.getElementById('authAlert');
+          const link = document.createElement('button');
+          link.type = 'button';
+          link.textContent = 'Reenviar correo de verificación';
+          link.style.cssText = 'margin-left:.5rem;background:none;border:none;color:inherit;text-decoration:underline;cursor:pointer;font:inherit';
+          link.addEventListener('click', async () => {
+            link.disabled = true;
+            try {
+              const r = await reenviarVerificacion(email);
+              showAlert(r.mensaje, 'success');
+            } catch (e2) {
+              showAlert(e2.message, 'error');
+            }
+          });
+          alertBox?.appendChild(link);
+        }
       }
     });
 

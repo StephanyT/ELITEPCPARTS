@@ -48,11 +48,8 @@ document.getElementById('wishlistBtn')?.addEventListener('click', async () => {
   try {
     const res = await fetch(`${BACKEND}/wishlist`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        usuarioId: session.id,
-        componentId: parseInt(currentProduct.id),
-      }),
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ componentId: parseInt(currentProduct.id) }),
     });
 
     if (res.status === 409) {
@@ -172,21 +169,21 @@ async function loadReviews(componentId) {
     }).join('');
     summaryEl.style.display = 'flex';
 
-    // Render reseñas
+    // Render reseñas (todo lo que escribió un usuario pasa por escapeHtml)
     listEl.innerHTML = reviews.map(r => {
       const nombre = r.usuario?.nombre || 'Usuario';
       const initials = nombre.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
       return `
         <div class="review-card">
           <div class="review-header">
-            <div class="reviewer-avatar">${initials}</div>
+            <div class="reviewer-avatar">${escapeHtml(initials)}</div>
             <div>
-              <strong>${nombre}</strong>
+              <strong>${escapeHtml(nombre)}</strong>
               <div class="stars">${starsHTML(Number(r.calificacion))}</div>
             </div>
-            <span class="review-date">${formatDate(r.creado_en)}</span>
+            <span class="review-date">${escapeHtml(formatDate(r.creado_en))}</span>
           </div>
-          ${r.comentario ? `<p>${r.comentario}</p>` : ''}
+          ${r.comentario ? `<p>${escapeHtml(r.comentario)}</p>` : ''}
         </div>`;
     }).join('');
 
@@ -215,11 +212,11 @@ document.getElementById('submitReviewBtn')?.addEventListener('click', async () =
   msg.style.display = 'none';
 
   try {
+    // Ya no se manda usuarioId: el backend lo saca del token
     const res = await fetch(`${BACKEND}/reviews`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({
-        usuarioId: session.id,
         componentId: parseInt(currentProduct.id),
         calificacion: selectedStars,
         comentario,
@@ -235,7 +232,9 @@ document.getElementById('submitReviewBtn')?.addEventListener('click', async () =
       starSpans.forEach(s => s.classList.remove('active'));
       await loadReviews(parseInt(currentProduct.id));
     } else {
-      msg.textContent = 'Error al enviar la reseña.';
+      msg.textContent = res.status === 409
+        ? 'Ya dejaste una reseña para este producto.'
+        : 'Error al enviar la reseña.';
       msg.style.color = '#ef4444';
       msg.style.display = 'block';
     }
@@ -273,13 +272,13 @@ function bindProduct(p) {
   const galleryMain = document.getElementById('galleryMain');
   if (galleryMain) {
     galleryMain.classList.remove('img-placeholder');
-    galleryMain.innerHTML = `<img src="${p.image}" alt="${p.name}" onerror="imgError(this)">`;
+    galleryMain.innerHTML = `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" onerror="imgError(this)">`;
   }
 
   // Specs
   const specsTable = document.querySelector('.product-specs table');
   if (specsTable && p.specs) {
-    specsTable.innerHTML = `<tr><td>Especificaciones</td><td>${p.specs}</td></tr>`;
+    specsTable.innerHTML = `<tr><td>Especificaciones</td><td>${escapeHtml(p.specs)}</td></tr>`;
   }
 
   // Formulario de reseña
@@ -304,8 +303,8 @@ function renderRelated(list, current) {
     <article class="product-card" onclick="window.location='producto.html?id=${p.id}'">
       ${productImg(p)}
       <div class="product-card__body">
-        <span class="product-card__cat">${p.category}</span>
-        <p class="product-card__name">${p.name}</p>
+        <span class="product-card__cat">${escapeHtml(p.category)}</span>
+        <p class="product-card__name">${escapeHtml(p.name)}</p>
         <div class="product-card__stars">${starsHTML(p.rating || 0)}<span>(${p.reviews || 0})</span></div>
         <div class="product-card__footer">
           <span class="product-card__price">S/ ${p.price.toLocaleString('es-PE')}</span>
