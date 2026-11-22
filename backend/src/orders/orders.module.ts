@@ -12,5 +12,7 @@ import { Cart } from '../cart/cart.entity';
   imports: [TypeOrmModule.forFeature([Order, OrderItem, Usuario, Component, Cart])],
   controllers: [OrdersController],
   providers: [OrdersService],
+  // Lo usa el módulo de pagos para crear el pedido cuando Niubiz aprueba
+  exports: [OrdersService],
 })
 export class OrdersModule {}

@@ -13,6 +13,10 @@ export class Order {
   @OneToMany(() => OrderItem, (item) => item.order, { cascade: true })
   orderItems!: OrderItem[];
 
+  // Costo de envío (ya incluido en el total)
+  @Column('decimal', { default: 0 })
+  envio!: number;
+
   @Column('decimal')
   total!: number;
 

@@ -11,6 +11,7 @@ import { Review } from './reviews/review.entity';
 import { Wishlist } from './wishlist/wishlist.entity';
 import { EmailVerification } from './email_verifications/email-verification.entity';
 import { Contacto } from './contacto/contacto.entity';
+import { Payment } from './payments/payment.entity';
 import { UsuariosModule } from './usuarios/usuarios.module';
 import { ComponentsModule } from './components/components.module';
 import { OrdersModule } from './orders/orders.module';
@@ -23,6 +24,7 @@ import { LoggerMiddleware } from './logger.middleware';
 import { AuthModule } from './auth/auth.module';
 import { ContactoModule } from './contacto/contacto.module';
 import { MailModule } from './mail/mail.module';
+import { PaymentsModule } from './payments/payments.module';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { RolesGuard } from './auth/roles.guard';
 import { isProduction, requiredEnv } from './config';
@@ -38,7 +40,7 @@ import { isProduction, requiredEnv } from './config';
         // Sin contraseña por defecto en el código: tiene que venir del entorno
         password: requiredEnv('DB_PASSWORD'),
         database: process.env.DB_NAME || 'elitepcparts',
-        entities: [Usuario, Component, Order, OrderItem, Cart, Review, Wishlist, EmailVerification, Contacto],
+        entities: [Usuario, Component, Order, OrderItem, Cart, Review, Wishlist, EmailVerification, Contacto, Payment],
         // synchronize cambia las tablas solo. Útil en desarrollo, peligroso en producción.
         synchronize: !isProduction(),
       }),
@@ -56,6 +58,7 @@ import { isProduction, requiredEnv } from './config';
     AuthModule,
     ContactoModule,
     MailModule,
+    PaymentsModule,
   ],
   providers: [
     // Los guards globales corren en este orden en cada petición:

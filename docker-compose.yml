@@ -21,6 +21,11 @@ services:
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:?Falta ADMIN_PASSWORD en el archivo .env}
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost,http://127.0.0.1}
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost}
+      - BACKEND_URL=${BACKEND_URL:-http://localhost:3000}
+      # Pagos con Niubiz (sandbox): las credenciales viven solo en el backend
+      - NIUBIZ_MERCHANT_ID=${NIUBIZ_MERCHANT_ID:-}
+      - NIUBIZ_USER=${NIUBIZ_USER:-}
+      - NIUBIZ_PASSWORD=${NIUBIZ_PASSWORD:-}
     depends_on:
       - db
     healthcheck:

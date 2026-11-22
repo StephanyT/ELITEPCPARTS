@@ -29,6 +29,9 @@ export class OrdersController {
     return this.ordersService.findOne(usuario, id);
   }
 
+  // Crear un pedido directo, sin pago, solo lo puede hacer el admin (pedidos manuales).
+  // Los clientes compran por /payments/niubiz: el pedido se crea recién cuando Niubiz aprueba el pago.
+  @Roles('admin')
   @Post()
   @ApiBody({ schema: { example: { direccion: 'Av. Siempre Viva 123, Lima', items: [{ componentId: 1, cantidad: 1 }] } } })
   create(@CurrentUser() usuario: UsuarioToken, @Body() dto: CreateOrderDto) {
