@@ -29,8 +29,8 @@ Tienda de comercio electrónico especializada en componentes de PC. Desarrollada
 ## Instalación
 
 ```bash
-git clone https://github.com/StephanyT/ELITEPCPARTS.git
-cd ELITEPCPARTS
+git clone https://github.com/StephanyTasayco/socket-society.git
+cd socket-society
 ```
 
 Crear el archivo `.env` a partir del ejemplo y completar los valores:
@@ -168,7 +168,7 @@ El CI de GitHub Actions corre en cada push y PR a `main`: compila el frontend (j
 ## Estructura del proyecto
 
 ```
-ELITEPCPARTS/
+socket-society/
 ├── frontend/
 │   ├── index.html
 │   └── src/
