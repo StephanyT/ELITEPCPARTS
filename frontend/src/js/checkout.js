@@ -30,7 +30,7 @@ function renderOrderSummary() {
     itemsEl.innerHTML = checkoutCart.map(item => `
       <div class="summary-item">
         <div class="summary-item__qty">${item.qty}</div>
-        <div class="summary-item__name">${item.name}</div>
+        <div class="summary-item__name">${escapeHtml(item.name)}</div>
         <div class="summary-item__price">S/ ${(item.price * item.qty).toLocaleString('es-PE')}</div>
       </div>`).join('');
   }
@@ -175,16 +175,18 @@ async function niubizSetup() {
       document.getElementById('shpPais')?.value,
     ].filter(Boolean).join(', ');
 
+    // Solo se guarda QUÉ y CUÁNTO. El backend pone los precios y el total.
+    // (nombre y total se guardan aparte, solo para mostrarlos si el servidor no responde)
     localStorage.setItem('epc_pending_order', JSON.stringify({
-      usuarioId: _session?.id,
-      total: totalAmt,
       direccion,
       items: checkoutCart.map(i => ({
         componentId: parseInt(i.id),
         cantidad:    i.qty,
-        precio_unitario: i.price,
-        nombre: i.name,
       })),
+    }));
+    localStorage.setItem('epc_pending_order_resumen', JSON.stringify({
+      total: totalAmt,
+      productos: checkoutCart.map(i => `${i.qty}x ${i.name}`).join(', '),
     }));
 
     // 4. Configurar acción del form (proxy de Niubiz)

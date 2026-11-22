@@ -26,8 +26,8 @@ function renderCart() {
     <div class="cart-item" data-id="${item.id}">
       ${productImg(item, 'cart-item__img')}
       <div class="cart-item__info">
-        <span class="cart-item__cat">${item.category || 'Componente'}</span>
-        <p class="cart-item__name">${item.name}</p>
+        <span class="cart-item__cat">${escapeHtml(item.category || 'Componente')}</span>
+        <p class="cart-item__name">${escapeHtml(item.name)}</p>
         <p class="cart-item__price">S/ ${item.price.toLocaleString('es-PE')} c/u</p>
       </div>
       <div class="cart-item__controls">
@@ -132,8 +132,8 @@ function renderSuggested() {
       <article class="product-card" onclick="window.location='producto.html?id=${p.id}'">
         ${productImg(p)}
         <div class="product-card__body">
-          <span class="product-card__cat">${p.category}</span>
-          <p class="product-card__name">${p.name}</p>
+          <span class="product-card__cat">${escapeHtml(p.category)}</span>
+          <p class="product-card__name">${escapeHtml(p.name)}</p>
           <div class="product-card__stars">${starsHTML(p.rating)} <span>(${p.reviews})</span></div>
           <div class="product-card__footer">
             <span class="product-card__price">S/ ${p.price.toLocaleString('es-PE')}</span>
@@ -148,10 +148,10 @@ function renderSuggested() {
 // Cargar carrito desde backend al entrar a la página (si hay sesión activa)
 (async function initCart() {
   const session = typeof getSession === 'function' ? getSession() : null;
-  if (session?.id) {
+  if (session?.token) {
     try {
       const res = await fetch(`${BACKEND}/cart`, {
-        headers: { 'usuario-id': String(session.id) },
+        headers: authHeaders(),
       });
       if (res.ok) {
         const items = await res.json();
