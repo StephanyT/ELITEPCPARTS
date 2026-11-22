@@ -1,8 +1,9 @@
 name: Deploy to S3 + CloudFront
 
+# Solo se ejecuta a mano (Actions → Run workflow).
+# El frontend apunta a localhost:3000, así que desplegarlo solo dejaría un sitio roto.
+# El despliegue completo se rehace con Terraform en la Fase 3.
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
 
 concurrency:

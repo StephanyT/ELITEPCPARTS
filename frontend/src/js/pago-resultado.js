@@ -38,10 +38,15 @@
 
     if (pending) {
       try {
+        // Pedidos viejos guardados antes de este cambio traían precios: solo mandamos lo que el backend acepta
+        const body = {
+          direccion: pending.direccion || undefined,
+          items: (pending.items || []).map(i => ({ componentId: i.componentId, cantidad: i.cantidad })),
+        };
         const res = await fetch(`${BACKEND}/orders`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(pending),
+          headers: authHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify(body),
         });
         if (res.ok) {
           const data = await res.json();
@@ -52,14 +57,14 @@
         }
       } catch (e) {
         console.warn('No se pudo guardar el pedido en el servidor:', e);
-        console.log('Pending order era:', JSON.stringify(pending));
-        // Fallback a localStorage
+        // Fallback a localStorage (solo para mostrarlo en "Mis pedidos")
+        const resumen = JSON.parse(localStorage.getItem('epc_pending_order_resumen') || '{}');
         const savedOrders = JSON.parse(localStorage.getItem('epc_orders') || '[]');
         savedOrders.unshift({
           id: orderId,
           fecha: new Date().toLocaleDateString('es-PE', { day:'2-digit', month:'2-digit', year:'numeric' }),
-          productos: (pending.items || []).map(i => `${i.cantidad}x ${i.nombre || 'Producto'}`).join(', '),
-          total: pending.total,
+          productos: resumen.productos || '',
+          total: resumen.total,
           estado: 'Procesando',
         });
         localStorage.setItem('epc_orders', JSON.stringify(savedOrders));
@@ -69,20 +74,22 @@
     // Limpiar carrito (localStorage + backend)
     localStorage.setItem('epc_cart', '[]');
     localStorage.removeItem('epc_pending_order');
+    localStorage.removeItem('epc_pending_order_resumen');
     cart.length = 0;
     if (typeof cartBackendClear === 'function') cartBackendClear();
 
     // Mostrar pantalla de éxito
     titleEl.textContent = '¡Pago aprobado!';
 
+    // cardMasked y authCode vienen de la URL: cualquiera puede escribir ahí, por eso se escapan
     const cardInfo = cardMasked
-      ? `<div class="card-info"><i class="fab fa-cc-${brand.toLowerCase().includes('visa') ? 'visa' : 'mastercard'}"></i> ${cardMasked}</div>`
+      ? `<div class="card-info"><i class="fab fa-cc-${brand.toLowerCase().includes('visa') ? 'visa' : 'mastercard'}"></i> ${escapeHtml(cardMasked)}</div>`
       : '';
 
     msgEl.innerHTML = `
       Tu pedido ha sido confirmado. En breve recibirás un correo con los detalles.
       ${cardInfo}
-      ${authCode ? `<br><small>Código de autorización: <strong>${authCode}</strong></small>` : ''}
+      ${authCode ? `<br><small>Código de autorización: <strong>${escapeHtml(authCode)}</strong></small>` : ''}
     `;
 
     const chipEl = document.createElement('div');
